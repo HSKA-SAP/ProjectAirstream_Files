@@ -1,6 +1,4 @@
 from enum import Enum 
-
-
 ## Special characters for stuffing and squeezing
 class DPT_SpecialChar_t(Enum):
 	SOH_e = 0x01, # Start of Header (begin of packet)
@@ -14,7 +12,6 @@ class DPT_SpecialChar_t(Enum):
 	CR_e = 0x0D,  # Carriage Return
 	ModemEsc_e = 0x2B, # Standard Modem Escape Character
 	ShiftXOR_e = 0x40 # Shift XOR Value
-
 
 
 ## API commands
