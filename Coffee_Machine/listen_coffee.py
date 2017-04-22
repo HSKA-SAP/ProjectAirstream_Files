@@ -1,6 +1,5 @@
 import time
 import serial
-from msvcrt import getch
 ## Define devices
 
 coffee = serial.Serial(
@@ -25,3 +24,9 @@ while 1 :
 		out += coffee.read(1)
 		if coffee.in_waiting == 0:
 			print(out)
+
+###########################################################
+#					   RESPONSES					      #	
+###########################################################
+			if out == b"Make some coffee":
+				print("Making coffee")
