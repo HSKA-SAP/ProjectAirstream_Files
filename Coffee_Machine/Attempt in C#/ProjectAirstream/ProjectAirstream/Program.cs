@@ -41,32 +41,104 @@ namespace ProjectAirstream
                 Telegram doRinse = new Telegram();
                 doRinse.SOH = (byte)ControlDefinitions.DPT_SpecialChar_t.SOH_e;
                 doRinse.PIP = 0x00;
-                doRinse.PIE = 0x68;
+                doRinse.PIE = 0x6A;
                 doRinse.PN = 0x01;
-                doRinse.SA = 0x42;
-                doRinse.DA = 0x41;
-                doRinse.MI = 0x03;
-                doRinse.MP = 0x00;
-                doRinse.DL = 0x0000;
-
+                doRinse.SA = 0x41;
+                doRinse.DA = 0x42;
                 doRinse.EOT = (byte)ControlDefinitions.DPT_SpecialChar_t.EOT_e;
-                //startMessage.data = new byte[] { 0x61, 0x41, 0x43};
 
-                
-                byte[] serializedMessage = RawSerialize(doRinse);
-                ushort someName = API_CalculateCRC(ref serializedMessage,serializedMessage.Length);
-
-                Console.Write(someName);
-
-                Console.Write("\n");
-
-                for (int i = 0; i < serializedMessage.Length - 1; i++)
+                //For CRC
+                byte[] serializedBuffer = new byte[]
                 {
-                    Console.Write(serializedMessage[i]);
+                    0x99,
+                    0x76,
+                    0x00,
+                    0x88,
+                    0x01,
+
+                };
+
+                //serialize data
+                //byte[] serializedMessage = RawSerialize(doRinse);
+                //ushort someName = API_CalculateCRC(ref serializedMessage,serializedMessage.Length);
+                byte[] shiftedBuffer = new byte[serializedBuffer.Length * 2];
+
+
+                byte refByte = 0;
+                bool shiftComplete = true;
+                bool startXOR = false;
+                bool specialChar = false;
+                bool specialCopy = false;
+                int resumePoint = 0;
+                byte[] specialBuffers = new byte[serializedBuffer.Length];
+                byte specialBuffersCnt = 0;
+
+                Console.WriteLine(serializedBuffer.Length - 1);
+
+                // PROBLEM  -> What if next number is a special character
+
+                //Console.WriteLine(0 ^ 64);
+                for (int i = 0; i <= serializedBuffer.Length - 1; i++)
+                {
+                    foreach (var val in Enum.GetValues(typeof(ControlDefinitions.DPT_SpecialChar_t))) //can get into this loop is specialchar is false?
+                    {
+                        //if detecting a special character
+                        if (((serializedBuffer[i] == (int)val) && (i != 0 && i != serializedBuffer.Length - 1)))
+                        {
+                            specialBuffersCnt += 1;
+                            specialBuffers[specialBuffersCnt] = serializedBuffer[i];
+                            specialChar = true;
+                            shiftComplete = false;
+                            break;
+                        }
+
+                    }
+                    //Control structure for shifting 
+
+                    serializedBuffer[i] = (specialCopy) ? shiftedBuffer[i] = serializedBuffer[resumePoint] : shiftedBuffer[i] = serializedBuffer[i];
+
+                    if (specialChar && !shiftComplete && specialBuffersCnt >0) 
+                    {
+                        refByte = specialBuffers[specialBuffersCnt-specialBuffersCnt];
+                        specialBuffersCnt -= 1;
+                        shiftedBuffer[i] = (byte)ControlDefinitions.DPT_SpecialChar_t.DLE_e;
+                    }
+
+                    if (!shiftComplete)
+                    {
+                        if (startXOR) //The next iteration
+                        {
+                            shiftedBuffer[i] = (byte)(refByte ^ (byte)ControlDefinitions.DPT_SpecialChar_t.ShiftXOR_e);
+                            shiftComplete = true;
+                            specialChar = false;
+                            specialCopy = true;
+                            resumePoint = i;
+
+                        }
+                        startXOR = true;
+                        specialChar = false;
+
+
+                    }
+
                 }
 
+                string serializedMessage_h = BitConverter.ToString(serializedBuffer);
+                string shiftedBuffer_h = BitConverter.ToString(shiftedBuffer);
+
+                foreach(var val in serializedMessage_h)
+                {
+                    Console.Write(val);
+                }
+                Console.WriteLine();
+
+                foreach (var val in shiftedBuffer_h)
+                {
+                    Console.Write(val);
+                }
 
             }
+    
             Console.Write("\n Press any key to exit..\n");
             Console.ReadKey();
 

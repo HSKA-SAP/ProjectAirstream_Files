@@ -5,14 +5,16 @@ import serial
 ## Define devices
 
 
-raspberry = serial.Serial(
-	port='COM1',
-	timeout=None,
-	baudrate=9600,
-	parity=serial.PARITY_NONE,
-	stopbits=serial.STOPBITS_ONE,
-	bytesize=serial.EIGHTBITS
-)
+raspberry = serial.Serial()
+raspberry.port = 'COM1'
+raspberry.timeout = None
+raspberry.baudrate = 9600
+raspberry.parity = serial.PARITY_NONE
+raspberry.stopbits = serial.STOPBITS_ONE
+raspberry.bytesize = serial.EIGHTBITS
+
+if raspberry.is_open != False:
+	raspberry.open()
 
 
 
