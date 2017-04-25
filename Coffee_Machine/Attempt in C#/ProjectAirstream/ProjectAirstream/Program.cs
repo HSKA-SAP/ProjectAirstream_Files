@@ -51,76 +51,44 @@ namespace ProjectAirstream
                 byte[] serializedBuffer = new byte[]
                 {
                     0x99,
-                    0x76,
-                    0x00,
-                    0x88,
-                    0x01,
+                    0x99,
+                    0x99,
+                    0x99,
+                    0x99,
+                    0x99,
 
                 };
+                //PROBLEM FOR NON-SPECIAL CHARACTERS BETWEEN SPECIAL CHARACTERS
 
                 //serialize data
-                //byte[] serializedMessage = RawSerialize(doRinse);
+                //byte[] serializedBuffer = RawSerialize(doRinse);
                 //ushort someName = API_CalculateCRC(ref serializedMessage,serializedMessage.Length);
                 byte[] shiftedBuffer = new byte[serializedBuffer.Length * 2];
 
 
-                byte refByte = 0;
-                bool shiftComplete = true;
-                bool startXOR = false;
                 bool specialChar = false;
-                bool specialCopy = false;
-                int resumePoint = 0;
-                byte[] specialBuffers = new byte[serializedBuffer.Length];
-                byte specialBuffersCnt = 0;
+                byte shiftedOffset = 0;
+                byte posInOriginal = 0;
+                byte refIndex = 0;
+                byte[] positions = new byte[2];
 
                 Console.WriteLine(serializedBuffer.Length - 1);
-
+                byte a = shiftedBuffer[0];
                 // PROBLEM  -> What if next number is a special character
 
-                //Console.WriteLine(0 ^ 64);
                 for (int i = 0; i <= serializedBuffer.Length - 1; i++)
                 {
-                    foreach (var val in Enum.GetValues(typeof(ControlDefinitions.DPT_SpecialChar_t))) //can get into this loop is specialchar is false?
+                    positions = RecursiveStuffAndShift(positions,serializedBuffer[i],serializedBuffer, shiftedBuffer, (byte)i, positions[0],0);
+                    CopyArrays(shiftedBuffer, positions[0], serializedBuffer, positions[1]);
+                    //Recursion returns 4 and 3 for positions after finished
+                    //positions[1] += 1;
+                    if(positions[1] >= serializedBuffer.Length-1)
                     {
-                        //if detecting a special character
-                        if (((serializedBuffer[i] == (int)val) && (i != 0 && i != serializedBuffer.Length - 1)))
-                        {
-                            specialBuffersCnt += 1;
-                            specialBuffers[specialBuffersCnt] = serializedBuffer[i];
-                            specialChar = true;
-                            shiftComplete = false;
-                            break;
-                        }
-
+                        break;
                     }
-                    //Control structure for shifting 
-
-                    serializedBuffer[i] = (specialCopy) ? shiftedBuffer[i] = serializedBuffer[resumePoint] : shiftedBuffer[i] = serializedBuffer[i];
-
-                    if (specialChar && !shiftComplete && specialBuffersCnt >0) 
-                    {
-                        refByte = specialBuffers[specialBuffersCnt-specialBuffersCnt];
-                        specialBuffersCnt -= 1;
-                        shiftedBuffer[i] = (byte)ControlDefinitions.DPT_SpecialChar_t.DLE_e;
-                    }
-
-                    if (!shiftComplete)
-                    {
-                        if (startXOR) //The next iteration
-                        {
-                            shiftedBuffer[i] = (byte)(refByte ^ (byte)ControlDefinitions.DPT_SpecialChar_t.ShiftXOR_e);
-                            shiftComplete = true;
-                            specialChar = false;
-                            specialCopy = true;
-                            resumePoint = i;
-
-                        }
-                        startXOR = true;
-                        specialChar = false;
-
-
-                    }
-
+                    i = positions[1];
+                    positions[0]++; //increment shifterBuffer counter
+                    positions[1]++;
                 }
 
                 string serializedMessage_h = BitConverter.ToString(serializedBuffer);
@@ -139,12 +107,96 @@ namespace ProjectAirstream
 
             }
     
-            Console.Write("\n Press any key to exit..\n");
             Console.ReadKey();
 
 
         }
 
+        static byte[] RecursiveStuffAndShift(byte[] positions, byte nextByte, byte[] originalArray, byte[] shiftedArray, byte originalOffset, byte shiftedOffset, byte offset)
+        {
+            bool specialChar = CheckIfSpecial(nextByte);
+
+            if (specialChar && (originalOffset < originalArray.Length - 1 && originalOffset != 0)) //stuff and shift copy
+            {
+                //Stuff - replace original position with 0x10
+                StuffArray(shiftedArray, (byte)(originalOffset + offset)); //problem is here
+                //Shift
+                //error is here - index replaces
+                shiftedOffset = (byte)(ShiftArray(originalArray, shiftedArray, originalOffset, nextByte, offset) + (byte)offset);
+                nextByte = originalArray[originalOffset + 1];
+                RecursiveStuffAndShift(positions, nextByte, originalArray, shiftedArray, (byte)(originalOffset + 1), shiftedOffset, offset += 1);
+
+                return positions;
+            
+            }
+            else
+            {
+                positions[0] = shiftedOffset;
+                positions[1] = originalOffset;
+                // problem here - originalOffset should be incremented
+                return positions;
+            }
+        }
+        // 
+        static void DoRinse(Telegram telegram)
+        {
+
+        }
+
+        static void SendMessage(Telegram message)
+        {
+
+        }
+
+        static void DeserializeResponse(byte[] message)
+        {
+
+        }
+
+        static int ShiftArray(byte[] originalArray, byte[] stuffAndShiftedArray, int originalPos, byte refByte, byte offset)
+        {
+            stuffAndShiftedArray[originalPos + 1 + offset] = (byte)(refByte ^ (byte)ControlDefinitions.DPT_SpecialChar_t.ShiftXOR_e);
+            return originalPos + 2;
+        }
+
+        static void StuffArray(byte[] stuffAndShiftedArray, byte originalPos)
+        {
+            stuffAndShiftedArray[originalPos] = (byte)ControlDefinitions.DPT_SpecialChar_t.DLE_e;
+        }
+        static void CopyArrays(byte[] stuffAndShiftedArray, byte shiftedArrayIndex, byte[] originalArray, byte refIndex)
+        {
+            if(refIndex < originalArray.Length)
+            {
+                stuffAndShiftedArray[shiftedArrayIndex] = originalArray[refIndex];
+
+            }
+            //else if((shiftedArrayIndex - refIndex == 1) && refIndex < originalArray.Length)
+            //{
+            //    stuffAndShiftedArray[shiftedArrayIndex] = originalArray[refIndex];
+            //}
+            //else if((shiftedArrayIndex - refIndex == 2) && refIndex < originalArray.Length)
+            //{
+            //    refIndex++;
+            //    stuffAndShiftedArray[shiftedArrayIndex] = originalArray[refIndex];
+
+            //}
+
+        }
+
+
+        static bool CheckIfSpecial(byte byteToCheck)
+        {
+            foreach (var val in Enum.GetValues(typeof(ControlDefinitions.DPT_SpecialChar_t))) //can get into this loop is specialchar is false?
+            {
+                //if detecting a special character
+                if (byteToCheck == (int)val)
+                {
+                    return true;
+                }
+
+            }
+            return false;
+        }
 
         public static byte[] RawSerialize(object anything)
         {
@@ -156,16 +208,6 @@ namespace ProjectAirstream
             Marshal.FreeHGlobal(buffer);
             return rawDatas;
         }
-
-        //public static string ByteArrayToString(byte[] ba)
-        //{
-        //    StringBuilder hex = new StringBuilder(ba.Length * 2);
-        //    foreach (byte b in ba)
-        //        hex.AppendFormat("{0:x2}", b);
-        //    return hex.ToString();
-        //}
-
-
 
         static string ReadFromCoffee(List<SerialPort> ports)
         {
