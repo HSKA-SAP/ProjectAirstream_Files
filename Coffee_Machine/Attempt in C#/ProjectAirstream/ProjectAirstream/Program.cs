@@ -14,14 +14,14 @@ using System.Runtime.InteropServices;
 
 namespace ProjectAirstream
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
             List<SerialPort> openPorts = openSerialPorts();
 
             while(true){
-                Console.Write("\n >> Send from Pi....\n");
+                Console.Write("\n >> Send from Pi on port " + openPorts[0].PortName.ToString() + "....\n");
 
                 string input = Console.ReadLine();
                 if (input == "exit")
@@ -29,117 +29,183 @@ namespace ProjectAirstream
                     break;
 
                 }
-
-
                 WriteToPi(input, openPorts);
-                Console.Write("\n >> Read from Coffee Machine....\n");
+                Console.Write("\n >> Read from Coffee Machine on port " + openPorts[1].PortName.ToString() + "....\n");
                 string output = ReadFromCoffee(openPorts);
                 Console.Write(output + "\n");
 
-                // Do rinse example 
 
-                Telegram doRinse = new Telegram();
-                doRinse.SOH = (byte)ControlDefinitions.DPT_SpecialChar_t.SOH_e;
-                doRinse.PIP = 0x00;
-                doRinse.PIE = 0x6A;
-                doRinse.PN = 0x01;
-                doRinse.SA = 0x41;
-                doRinse.DA = 0x42;
-                doRinse.EOT = (byte)ControlDefinitions.DPT_SpecialChar_t.EOT_e;
-
-                //For CRC
-                byte[] serializedBuffer = new byte[]
-                {
-                    0x99,
-                    0x99,
-                    0x99,
-                    0x99,
-                    0x99,
-                    0x99,
-
-                };
-                //PROBLEM FOR NON-SPECIAL CHARACTERS BETWEEN SPECIAL CHARACTERS
-
-                //serialize data
-                //byte[] serializedBuffer = RawSerialize(doRinse);
-                //ushort someName = API_CalculateCRC(ref serializedMessage,serializedMessage.Length);
-                byte[] shiftedBuffer = new byte[serializedBuffer.Length * 2];
+                //Do rinse example
+                DoRinse();
 
 
-                bool specialChar = false;
-                byte shiftedOffset = 0;
-                byte posInOriginal = 0;
-                byte refIndex = 0;
-                byte[] positions = new byte[2];
+                //Console.Write("\n");
+                //byte[] someData = { 0, 1, 2 };
+                //byte[] outputData = new byte[100];
+                ////outputData = RawSerialize(someData);
 
-                Console.WriteLine(serializedBuffer.Length - 1);
-                byte a = shiftedBuffer[0];
-                // PROBLEM  -> What if next number is a special character
+                //foreach (var val in someData)
+                //{
+                //    Console.Write(val);
+                //}
 
-                for (int i = 0; i <= serializedBuffer.Length - 1; i++)
-                {
-                    positions = RecursiveStuffAndShift(positions,serializedBuffer[i],serializedBuffer, shiftedBuffer, (byte)i, positions[0],0);
-                    CopyArrays(shiftedBuffer, positions[0], serializedBuffer, positions[1]);
-                    //Recursion returns 4 and 3 for positions after finished
-                    //positions[1] += 1;
-                    if(positions[1] >= serializedBuffer.Length-1)
-                    {
-                        break;
-                    }
-                    i = positions[1];
-                    positions[0]++; //increment shifterBuffer counter
-                    positions[1]++;
-                }
-
-                string serializedMessage_h = BitConverter.ToString(serializedBuffer);
-                string shiftedBuffer_h = BitConverter.ToString(shiftedBuffer);
-
-                foreach(var val in serializedMessage_h)
-                {
-                    Console.Write(val);
-                }
-                Console.WriteLine();
-
-                foreach (var val in shiftedBuffer_h)
-                {
-                    Console.Write(val);
-                }
 
             }
-    
+
             Console.ReadKey();
 
 
         }
 
-        static byte[] RecursiveStuffAndShift(byte[] positions, byte nextByte, byte[] originalArray, byte[] shiftedArray, byte originalOffset, byte shiftedOffset, byte offset)
-        {
-            bool specialChar = CheckIfSpecial(nextByte);
 
-            if (specialChar && (originalOffset < originalArray.Length - 1 && originalOffset != 0)) //stuff and shift copy
+        static byte[] TransformSerializedArray(byte[] serializedBuffer, byte[] shiftedBuffer)
+        {
+            // positions[0]  - tracks current shifted buffer position to copy into 
+            // positions[1] - tracke current original buffer position to copy into
+
+            byte[] positions = new byte[2];
+
+            for (int i = 0; i <= serializedBuffer.Length - 1; i++)
             {
+                //Note the value of next byte is initially given as the first byte in the original array: serializedBuffer
+                //start with a recursion count of 0 since no recursion has occured
+                positions = RecursiveStuffAndShift(positions, serializedBuffer[i], serializedBuffer, shiftedBuffer, positions[1], positions[0], 0);
+                CopyArrays(shiftedBuffer, positions[0], serializedBuffer, positions[1]);
+
+                if (positions[1] >= serializedBuffer.Length - 1)
+                {
+                    break;
+                }
+                i = positions[1]; //update i to increment/sync up with the positions[1] variable on the next iteration
+                positions[0]++; //increment shifterBuffer position to copy to  because copy is complete
+                positions[1]++; //increment serializedBuffer position to copy to because copy is complete
+            }
+            return shiftedBuffer;
+        }
+
+
+        static byte[] RecursiveStuffAndShift(byte[] positions, byte currentByte, byte[] originalArray, byte[] shiftedArray, byte cpyFromPosInOriginal, byte cpyToPosInShifted, byte recursionCnt)
+        {
+            bool specialChar = CheckIfSpecial(currentByte);
+
+            // if special and not last or first byte (will skip this section if stuffing and shifting first and last byte)
+            if (specialChar && (cpyFromPosInOriginal < originalArray.Length - 1 && cpyFromPosInOriginal != 0)) //stuff and shift copy
+            {
+                
                 //Stuff - replace original position with 0x10
-                StuffArray(shiftedArray, (byte)(originalOffset + offset)); //problem is here
-                //Shift
-                //error is here - index replaces
-                shiftedOffset = (byte)(ShiftArray(originalArray, shiftedArray, originalOffset, nextByte, offset) + (byte)offset);
-                nextByte = originalArray[originalOffset + 1];
-                RecursiveStuffAndShift(positions, nextByte, originalArray, shiftedArray, (byte)(originalOffset + 1), shiftedOffset, offset += 1);
+                StuffArray(shiftedArray, cpyToPosInShifted); //problem is here
+
+                cpyToPosInShifted++;
+                //Shift - replace next position with the XOR or the currentByte and 0x40 (currentByte ^ 0x40)
+                ShiftArray(shiftedArray, cpyToPosInShifted, currentByte);
+
+                cpyToPosInShifted++;
+                //get next byte before incrementing to cpy from counter
+                currentByte = originalArray[cpyFromPosInOriginal + 1];
+
+                //increment cpyFrom position because we have performed a copy of cpyFrom position to copyToPos even if it isn't through the copy method
+                cpyFromPosInOriginal++;
+                positions[0] = cpyToPosInShifted;
+                positions[1] = cpyFromPosInOriginal;
+
+                RecursiveStuffAndShift(positions, currentByte, originalArray, shiftedArray, (byte)(cpyFromPosInOriginal), cpyToPosInShifted, recursionCnt += 1);
 
                 return positions;
             
             }
             else
             {
-                positions[0] = shiftedOffset;
-                positions[1] = originalOffset;
-                // problem here - originalOffset should be incremented
                 return positions;
             }
         }
-        // 
-        static void DoRinse(Telegram telegram)
+
+        static int ShiftArray(byte[] stuffAndShiftedArray, byte cpyToPosInShifted, byte refByte)
         {
+            stuffAndShiftedArray[cpyToPosInShifted] = (byte)(refByte ^ (byte)ControlDefinitions.DPT_SpecialChar_t.ShiftXOR_e);
+            return cpyToPosInShifted + 2;
+        }
+
+        static void StuffArray(byte[] stuffAndShiftedArray, byte cpyToPosInShifted)
+        {
+            stuffAndShiftedArray[cpyToPosInShifted] = (byte)ControlDefinitions.DPT_SpecialChar_t.DLE_e;
+        }
+
+
+        static void CopyArrays(byte[] stuffAndShiftedArray, byte shiftedArrayIndex, byte[] originalArray, byte refIndex)
+        {
+            if(refIndex < originalArray.Length)
+            {
+                stuffAndShiftedArray[shiftedArrayIndex] = originalArray[refIndex];
+
+            }
+
+        }
+
+        static void DoRinse()
+        {
+
+            // Do rinse example 
+
+            Telegram doRinse = new Telegram();
+            doRinse.SOH = (byte)ControlDefinitions.DPT_SpecialChar_t.SOH_e;
+            doRinse.PIP = 0x00;
+            doRinse.PIE = 0x6A;
+            doRinse.PN = 0x01;
+            doRinse.SA = 0x41;
+            doRinse.DA = 0x42;
+            doRinse.EOT = (byte)ControlDefinitions.DPT_SpecialChar_t.EOT_e;
+
+            byte[] serializedBuffer =
+            {
+                    doRinse.SOH,
+                    doRinse.PIP,
+                    doRinse.PIE,
+                    doRinse.PN,
+                    doRinse.SA,
+                    doRinse.DA,
+                    0, // where the CRC goes
+
+                };
+
+            //For CRC CALCULATION
+
+
+            //serialize the struct
+            //byte[] serializedBuffer = RawSerialize(doRinse);
+            //ushort CRC = API_CalculateCRC(ref serializedBuffer, serializedBuffer.Length);
+            //serializedBuffer[serializedBuffer.Length-1] = CRC;
+
+
+
+            //// TEST VARIABLES ////// 
+            //byte[] serializedBuffer = new byte[]
+            //{
+            //    0x99,
+            //    0x00,
+            //    0x00,
+            //    0x00,
+            //    0x00,
+            //    0x99,
+            //};
+
+            //Size must be double to ensure the case that each character is a special character
+            byte[] shiftedBuffer = new byte[serializedBuffer.Length * 2];
+            shiftedBuffer = TransformSerializedArray(serializedBuffer, shiftedBuffer);
+
+            //get hexadecimal vals
+            string serializedMessage_h = BitConverter.ToString(serializedBuffer);
+            string shiftedBuffer_h = BitConverter.ToString(shiftedBuffer);
+
+            foreach (var val in serializedMessage_h)
+            {
+                Console.Write(val);
+            }
+            Console.WriteLine();
+
+            foreach (var val in shiftedBuffer_h)
+            {
+                Console.Write(val);
+            }
 
         }
 
@@ -150,36 +216,6 @@ namespace ProjectAirstream
 
         static void DeserializeResponse(byte[] message)
         {
-
-        }
-
-        static int ShiftArray(byte[] originalArray, byte[] stuffAndShiftedArray, int originalPos, byte refByte, byte offset)
-        {
-            stuffAndShiftedArray[originalPos + 1 + offset] = (byte)(refByte ^ (byte)ControlDefinitions.DPT_SpecialChar_t.ShiftXOR_e);
-            return originalPos + 2;
-        }
-
-        static void StuffArray(byte[] stuffAndShiftedArray, byte originalPos)
-        {
-            stuffAndShiftedArray[originalPos] = (byte)ControlDefinitions.DPT_SpecialChar_t.DLE_e;
-        }
-        static void CopyArrays(byte[] stuffAndShiftedArray, byte shiftedArrayIndex, byte[] originalArray, byte refIndex)
-        {
-            if(refIndex < originalArray.Length)
-            {
-                stuffAndShiftedArray[shiftedArrayIndex] = originalArray[refIndex];
-
-            }
-            //else if((shiftedArrayIndex - refIndex == 1) && refIndex < originalArray.Length)
-            //{
-            //    stuffAndShiftedArray[shiftedArrayIndex] = originalArray[refIndex];
-            //}
-            //else if((shiftedArrayIndex - refIndex == 2) && refIndex < originalArray.Length)
-            //{
-            //    refIndex++;
-            //    stuffAndShiftedArray[shiftedArrayIndex] = originalArray[refIndex];
-
-            //}
 
         }
 
