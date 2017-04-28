@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ProjectAirstream
 {
-    class ControlDefinitions
+    public class ControlDefinitions
     {
 
         public enum DPT_SpecialChar_t
