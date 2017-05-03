@@ -1,0 +1,8 @@
+{"intents": [
+    {"intent": "KaffeemaschineIntent"},
+    {"intent": "AMAZON.StartOverIntent"},
+    {"intent": "AMAZON.HelpIntent"},
+    {"intent": "AMAZON.StopIntent"},
+    {"intent": "AMAZON.CancelIntent"}
+  ]
+}
