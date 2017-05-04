@@ -197,26 +197,26 @@ namespace ProjectAirstream
         }
 
         /**************************************** COMMANDS  *****************************************/
-        static string DoRinse(byte MI, ushort MP, ushort DL)
+        static string DoRinse(byte MI, ushort MP, ushort DL, byte seqNum)
         {
-            string telegram = CreateTelegram(0x00, 0x68, 0x01, 0x42, 0x41, MI, MP, DL, false, new byte[] { 0 });
+            string telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41, MI, MP, DL, false, new byte[] { 0 });
             return telegram;
 
         }
-        public static string DoRinseLeft()
+        public static string DoRinseLeft(byte seqNum)
         {
-            string telegram = DoRinse((byte)ControlDefinitions.API_Command_t.DoRinse_e, LEFT_SIDE, 0);
+            string telegram = DoRinse((byte)ControlDefinitions.API_Command_t.DoRinse_e, LEFT_SIDE, 0,seqNum);
             return telegram;
         }
-        public static string DoRinseRight()
+        public static string DoRinseRight(byte seqNum)
         {
-            string telegram = DoRinse((byte)ControlDefinitions.API_Command_t.DoRinse_e, RIGHT_SIDE, 0);
+            string telegram = DoRinse((byte)ControlDefinitions.API_Command_t.DoRinse_e, RIGHT_SIDE, 0,seqNum);
             return telegram;
 
         }
-        public static string StartClean()
+        public static string StartClean(byte seqNum)
         {
-            string telegram = CreateTelegram(0x00, 0x68, 0x01, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.StartCleaning_e, 0, 0, false, new byte[] { 0 });
+            string telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.StartCleaning_e, 0, 0, false, new byte[] { 0 });
             return telegram;
         }
 
@@ -224,126 +224,132 @@ namespace ProjectAirstream
         ///  Check if L or R outlet needs to be rinsed 
         /// </summary>
         /// <returns>The telegram for the request </returns>
-        public static string GetRequest()
+        public static string GetRequest(byte seqNum)
         {
-            string telegram = CreateTelegram(0x00, 0x68, 0x01, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.GetRequests_e, 0, 0, false, new byte[] { 0 });
+            string telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.GetRequests_e, 0, 0, false, new byte[] { 0 });
             return telegram;
         }
 
 
-        public static string StopProcess(byte module)
+        public static string StopProcess(byte module, byte seqNum)
         {
-            string telegram = CreateTelegram(0x00, 0x68, 0x00, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.Stop_e, module, 0x00, false, new byte[] { 0 });
+            string telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.Stop_e, module, 0x00, false, new byte[] { 0 });
             return telegram;
         }
 
-        public static string StopAllProcess()
+        public static string StopAllProcess(byte seqNum)
         {
-            string telegram = CreateTelegram(0x00, 0x68, 0x00, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.Stop_e, 0, 0x00, false, new byte[] { 0 });
+            string telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.Stop_e, 0, 0x00, false, new byte[] { 0 });
             return telegram;
         }
 
-        static string RinseMilkOutlet(byte rinseMode, ushort side)
+        static string RinseMilkOutlet(byte rinseMode, ushort side, byte seqNum)
         {
             byte[] array = new byte[MILK_OUTLET_DATA_SIZE];
             array[0] = rinseMode;
             array[1] = (BitConverter.GetBytes(MILK_TUBE_LENGTH))[0];
             array[2] = (BitConverter.GetBytes(MILK_TUBE_LENGTH))[1];
 
-            string telegram = CreateTelegram(0x00, 0x68, 0x00, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.MilkOutletRinse_e, side, MILK_OUTLET_DATA_SIZE, true, array);
+            string telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.MilkOutletRinse_e, side, MILK_OUTLET_DATA_SIZE, true, array);
             return telegram;
         }
 
-        public static string RinseRightMilkOutlet()
+        public static string RinseRightMilkOutlet(byte seqNum)
         {
-            string telegram = RinseMilkOutlet(1, RIGHT_SIDE);
+            string telegram = RinseMilkOutlet(1, RIGHT_SIDE,seqNum);
             return telegram;
         }
-        public static string RinseLeftMilkOutlet()
+        public static string RinseLeftMilkOutlet(byte seqNum)
         {
-            string telegram = RinseMilkOutlet(1, LEFT_SIDE);
-            return telegram;
-        }
-
-        public static string RinseRightTubes()
-        {
-            string telegram = RinseMilkOutlet(2, RIGHT_SIDE);
+            string telegram = RinseMilkOutlet(1, LEFT_SIDE,seqNum);
             return telegram;
         }
 
-        public static string RinseLeftTubes()
+        public static string RinseRightTubes(byte seqNum)
         {
-            string telegram = RinseMilkOutlet(2, LEFT_SIDE);
-            return telegram;
-        }
-        public static string RinseRightTubesAndOutlet()
-        {
-            string telegram = RinseMilkOutlet(0, RIGHT_SIDE);
-            return telegram;
-        }
-        public static string RinseLeftTubesAndOutlet()
-        {
-            string telegram = RinseMilkOutlet(0, LEFT_SIDE);
+            string telegram = RinseMilkOutlet(2, RIGHT_SIDE,seqNum);
             return telegram;
         }
 
-        static string DoScreenRinse(byte side)
+        public static string RinseLeftTubes(byte seqNum)
+        {
+            string telegram = RinseMilkOutlet(2, LEFT_SIDE,seqNum);
+            return telegram;
+        }
+        public static string RinseRightTubesAndOutlet(byte seqNum)
+        {
+            string telegram = RinseMilkOutlet(0, RIGHT_SIDE,seqNum);
+            return telegram;
+        }
+        public static string RinseLeftTubesAndOutlet(byte seqNum)
+        {
+            string telegram = RinseMilkOutlet(0, LEFT_SIDE,seqNum);
+            return telegram;
+        }
+
+        static string DoScreenRinse(byte side, byte seqNum)
         {
             byte[] array = new byte[SCREEN_RINSE_DATA_SIZE];
             array[0] = 3; // screen rinse cycles
             array[1] = 10; //repetitions
 
-            string telegram = CreateTelegram(0x00, 0x68, 0x00, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.ScreenRinse_e, side, SCREEN_RINSE_DATA_SIZE, true, array);
+            string telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.ScreenRinse_e, side, SCREEN_RINSE_DATA_SIZE, true, array);
             return telegram;
         }
 
-        public static string DoRightScreenRinse()
+        public static string DoRightScreenRinse(byte seqNum)
         {
-            string telegram = DoScreenRinse(RIGHT_SIDE);
+            string telegram = DoScreenRinse(RIGHT_SIDE,seqNum);
             return telegram;
         }
-        public static string DoLeftScreenRinse()
+        public static string DoLeftScreenRinse(byte seqNum)
         {
-            string telegram = DoScreenRinse(LEFT_SIDE);
+            string telegram = DoScreenRinse(LEFT_SIDE,seqNum);
             return telegram;
         }
 
-        public static string GetInfoMessage()
+        public static string GetInfoMessage(byte seqNum)
         {
             byte[] array = new byte[] { 0, 0, 0 };
-            string telegram = CreateTelegram(0x00, 0x68, 0x00, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.GetInfoMessages_e, 0, 3, true, array);
+            string telegram = CreateTelegram(0x00, 0x68,seqNum, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.GetInfoMessages_e, 0, 3, true, array);
             return telegram;
         }
 
-        public static string DisplayAction(ControlDefinitions.API_DisplayAction_t action)
+        public static string DisplayAction(ControlDefinitions.API_DisplayAction_t action, byte seqNum)
         {
-            string telegram = CreateTelegram(0x00, 0x68, 0x00, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.DisplayAction_e, (byte)action, 0, false, new byte[] { 0 });
+            string telegram = CreateTelegram(0x00, 0x68,seqNum, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.DisplayAction_e, (byte)action, 0, false, new byte[] { 0 });
             return telegram;
         }
 
 
-        static string GetProductDump(byte side)
+        static string GetProductDump(byte side, byte seqNum)
         {
-            string telegram = CreateTelegram(0x00, 0x68, 0x00, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.GetProductDump_e, side, 0, false, new byte[] { 0 });
+            string telegram = CreateTelegram(0x00, 0x68,seqNum, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.GetProductDump_e, side, 0, false, new byte[] { 0 });
             return telegram;
 
         }
 
-        public static string GetProductDumpRight()
+        public static string GetProductDumpRight(byte seqNum)
         {
-            string telegram = GetProductDump(RIGHT_SIDE);
+            string telegram = GetProductDump(RIGHT_SIDE, seqNum);
             return telegram;
         }
-        public static string GetProductDumpLeft()
+        public static string GetProductDumpLeft(byte seqNum)
         {
-            string telegram = GetProductDump(LEFT_SIDE);
+            string telegram = GetProductDump(LEFT_SIDE,seqNum);
             return telegram;
         }
 
-        public static string GetSensorValues()
+        public static string GetSensorValues(byte seqNum)
         {
-            string telegram = CreateTelegram(0x00, 0x68, 0x00, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.GetSensorValues_e, 0, 0, false, new byte[] { 0 });
+            string telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.GetSensorValues_e, 0, 0, false, new byte[] { 0 });
             return telegram;
+        }
+        public static string GetStatus(byte seqNum)
+        {
+            string telegram = CreateTelegram(0x00,0x6C, seqNum, 0x42, 0x41, (byte)ControlDefinitions.API_Command_t.GetStatus_e,0,0, false, new byte[] { 0 });
+            return telegram;
+
         }
 
 

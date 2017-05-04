@@ -47,6 +47,13 @@ namespace ProjectAirstream
             GetSensorValues_e,
         }
 
+        public enum API_Request_t
+        {
+            OutletRinseLeft_e = 10,
+            OutletRinseRight_e = 11,
+        }
+
+
 
         public enum ProdAbortType_t
         {
@@ -83,11 +90,6 @@ namespace ProjectAirstream
         }
 
 
-        public enum API_Request_t
-        {
-            OutletRinseLeft_e = 10,
-            OutletRinseRight_e = 11,
-        }
 
 
         public enum MilkSequence_t

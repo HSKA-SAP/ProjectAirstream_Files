@@ -14,16 +14,8 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            Telegram doRinse = new Telegram();
-
-            List<byte> shiftArray = new List<byte>();
-
-            shiftArray[0] = 1;
-
-            foreach(var val in shiftArray)
-            {
-                Console.Write(val);
-            }
+            Console.WriteLine("Hello!");
+            Console.WriteLine(0x6c == 108 );
 
             Console.ReadKey();
         }
