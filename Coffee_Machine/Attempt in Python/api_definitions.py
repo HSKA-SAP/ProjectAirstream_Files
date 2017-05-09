@@ -1,16 +1,16 @@
 from enum import Enum 
 ## Special characters for stuffing and squeezing
 class DPT_SpecialChar_t(Enum):
-	SOH_e = 0x01, # Start of Header (begin of packet)
-	ETB_e = 0x17, # End of Transmit Block (end of packet)
-	DLE_e = 0x10, # Shift Character (next character has to be XORed)
-	NUL_e = 0x00, # NULL char
-	STX_e = 0x02, # Start of Text
-	ETX_e = 0x03, # End of Text
-	EOT_e = 0x04, # End of Transmission
-	LF_e = 0x0A,  # Line Feed
-	CR_e = 0x0D,  # Carriage Return
-	ModemEsc_e = 0x2B, # Standard Modem Escape Character
+	SOH_e = 0x01 # Start of Header (begin of packet)
+	ETB_e = 0x17 # End of Transmit Block (end of packet)
+	DLE_e = 0x10 # Shift Character (next character has to be XORed)
+	NUL_e = 0x00 # NULL char
+	STX_e = 0x02 # Start of Text
+	ETX_e = 0x03 # End of Text
+	EOT_e = 0x04 # End of Transmission
+	LF_e = 0x0A  # Line Feed
+	CR_e = 0x0D  # Carriage Return
+	ModemEsc_e = 0x2B # Standard Modem Escape Character
 	ShiftXOR_e = 0x40 # Shift XOR Value
 
  
@@ -157,3 +157,11 @@ class ProdAbortType_t(Enum):
 	ProdStopped_e = 1 # Product has been stopped (not used anymore)
 	ProdAbortMachine_e = 2 # Product has been stopped automatically
 	ProdAbortUser_e = 3 # Product has been stopped manually
+
+
+class PacketTypes(Enum):
+            ACK = 0x6A,
+            NACK = 0x6B,
+            COMMAND = 0x68,
+            REQUEST = 0x6C,
+            RESPONSE = 0x68,

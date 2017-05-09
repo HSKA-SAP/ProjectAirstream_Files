@@ -40,9 +40,9 @@ namespace ProjectAirstream
             string commandTelegram;
 
 
-            Console.WriteLine("Check status...[ENTER]");
+            //Console.WriteLine("Check status...[ENTER]");
 
-            //Send Get status command and check if ready 
+            ////Send Get status command and check if ready 
             commandTelegram = Commands.GetStatus(seqNumber);
 
             //Will stay in here forever if no response from coffe machine

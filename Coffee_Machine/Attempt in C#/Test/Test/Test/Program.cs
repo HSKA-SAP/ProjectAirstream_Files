@@ -14,11 +14,14 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello!");
-            Console.WriteLine(0x6c == 108 );
+            byte[] myArray = new byte[3];
+            foreach(var val in myArray)
+            {
+                Console.WriteLine(val);
+            }
 
-            Console.ReadKey();
-        }
+            Console.WriteLine(myArray.Length);
+            Console.ReadKey();        }
 
 
         public static byte[] RawSerialize(object anything)
