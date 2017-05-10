@@ -28,5 +28,6 @@ print 'Quantity water: %s' % quantityWater
 
 #Just for logs we write down to see wheter the order was correctly recognized
 with open('log.txt', 'a') as f:
-    f.write('Order successful: %s coffee and %s water at time %s\n' % (quantity$
+    f.write('Order successful: %s coffee and %s water at time %s\n' % (quantityCoffee,quantityWater,time.strftime("%d.%m.%Y %H:%M:%S")))
+
 
