@@ -119,21 +119,14 @@ var http = require('http');
 
 function httpGet(quantityCoffee, quantityWater, callback) {
 
-    // GET is a web service request that is fully defined by a URL string
-    // Try GET in your browser:
-    // https://cp6gckjt97.execute-api.us-east-1.amazonaws.com/prod/stateresource?usstate=New%20Jersey
-
-
-    // Update these options with the details of the web service you would like to call
+    
     var options = {
         host: 'airstream.hopto.org',
         port: 80,
         path: '/cgi-bin/coffeeCGI.py?coffee=' + quantityCoffee + '&water=' + quantityWater,
         method: 'GET',
 
-        // if x509 certs are required:
-        // key: fs.readFileSync('certs/my-key.pem'),
-        // cert: fs.readFileSync('certs/my-cert.pem')
+        
     };
 
     var req = http.request(options, res => {
@@ -148,14 +141,11 @@ function httpGet(quantityCoffee, quantityWater, callback) {
         });
 
         res.on('end', () => {
-            // we have now received the raw return data in the returnData variable.
-            // We can see it in the log output via:
-            // console.log(JSON.stringify(returnData))
-            // we may need to parse through it to extract the needed data
-
+            
             
 
-            callback(res.statusCode);  // this will execute whatever function the caller defined, with one argument
+			// We need the statusCode to know wheter the call was correctly
+            callback(res.statusCode);  
 
         });
 
