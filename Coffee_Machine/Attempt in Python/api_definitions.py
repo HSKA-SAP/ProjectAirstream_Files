@@ -165,3 +165,5 @@ class PacketTypes(Enum):
             COMMAND = 0x68,
             REQUEST = 0x6C,
             RESPONSE = 0x68,
+
+			
