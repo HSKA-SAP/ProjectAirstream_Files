@@ -78,7 +78,7 @@ var handlers = {
   
   // Here we just say: "You have to give your order if you start the coffeemachine. For Example: Alexa, start coffeemachine and make 2 coffee"
   'AnleitungIntent': function() {
-      this.emit(':tell', 'Du musst beim Start der Kaffeemaschine deine Bestellung mitgeben. Zum Beispiel, Alexa, starte Kaffeemaschine und mache 2 Kaffee');
+      this.emit(':tell', 'Sie müssen beim Start der Kaffeemaschine deine Bestellung mitgeben. Zum Beispiel, Alexa, starte Kaffeemaschine und mache 2 Kaffee');
   },
   
   'ConfirmationIntent': function(quantity, drink) {
@@ -91,6 +91,7 @@ var handlers = {
 		else
 			quantityCoffee = quantity;
 	  
+		
 		httpGet(quantityCoffee, quantityWater, (statusCode) => {
                 
 				if (statusCode == 200){
@@ -101,6 +102,7 @@ var handlers = {
 
             }
         );
+		
   }  
 
 };
@@ -121,7 +123,7 @@ function httpGet(quantityCoffee, quantityWater, callback) {
 
     
     var options = {
-        host: 'airstream.hopto.org',
+        host: 'coffeeinairstream.hopto.org',
         port: 80,
         path: '/cgi-bin/coffeeCGI.py?coffee=' + quantityCoffee + '&water=' + quantityWater,
         method: 'GET',
