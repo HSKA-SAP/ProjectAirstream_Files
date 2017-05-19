@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Airstream.Feedback.Voters;
 
 namespace Airstream.Feedback.QuestionsAndAnswers
 {
@@ -46,17 +47,24 @@ namespace Airstream.Feedback.QuestionsAndAnswers
     {
         private string _text;
         private int _countVotes;
+        private DateTime _dateTimeVote;
 
         public string text { get { return _text; } }
         public int countVotes { get { return _countVotes; } }
+        public DateTime dateTimeVote { get { return _dateTimeVote; } }
 
-        public Answer(string text, int countVotes)
+        public Answer(string text)
         {
             if (String.IsNullOrEmpty(text))
                 throw new Exception("No text existing!");
 
             _text = text;
-            _countVotes = countVotes;
+            _countVotes = 0;
+        }
+
+        public static void SetDateTimeVote(Answer answer)
+        {
+            answer._dateTimeVote = DateTime.Now;
         }
     }
 }
