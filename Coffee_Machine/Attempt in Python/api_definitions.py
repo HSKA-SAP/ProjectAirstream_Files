@@ -38,8 +38,8 @@ class API_Command_t(Enum):
 
 ## API requests 
 class API_Request_t(Enum):
-	OutletRinseLeft_e = 10,
-	OutletRinseRight_e = 11,
+	OutletRinseLeft_e = 10
+	OutletRinseRight_e = 11
 
 
 #####################################################################################
@@ -49,7 +49,7 @@ class API_Request_t(Enum):
 ## Action status of each module
 
 class Action_t(Enum):
-	ActionIdle_e = 0, # No product process is running
+	ActionIdle_e = 0 # No product process is running
 	ActionQueued_e = 1 # Next product is already queued
 	ActionSuspended_e = 2 # Product process interrupted and waiting for an action
 	ActionEnding_e = 3# Next product can already be ordered
@@ -64,7 +64,7 @@ class Action_t(Enum):
 
 ## Processes of each module
 class Process_t(Enum):
-	ProcessCoffee_e = 0,
+	ProcessCoffee_e = 0
 	ProcessSteam_e = 1
 	ProcessHotWater_e = 2
 	ProcessLearnWaterQnty_e = 3
@@ -144,7 +144,7 @@ class API_DisplayAction_t(Enum):
 	RestartDisplay_e = 9
 
 class BeanHopper_t(Enum):
-	Front_e = 0,
+	Front_e = 0
 	Rear_e = 1
 	Mix_e = 2
 	PowderChute_e = 3
@@ -153,17 +153,17 @@ class BeanHopper_t(Enum):
 
 
 class ProdAbortType_t(Enum):
-	ProdFinished_e = 0, # Product hasn’t been stopped
+	ProdFinished_e = 0 # Product hasn’t been stopped
 	ProdStopped_e = 1 # Product has been stopped (not used anymore)
 	ProdAbortMachine_e = 2 # Product has been stopped automatically
 	ProdAbortUser_e = 3 # Product has been stopped manually
 
 
 class PacketTypes(Enum):
-            ACK = 0x6A,
-            NACK = 0x6B,
-            COMMAND = 0x68,
-            REQUEST = 0x6C,
-            RESPONSE = 0x68,
+            ACK = 0x6A
+            NACK = 0x6B
+            COMMAND = 0x68
+            REQUEST = 0x6C
+            RESPONSE = 0x68
 
 			

@@ -14,17 +14,20 @@ from api_definitions import *
 
 
 ## Define devices
-def MakeCoffee():
+def Listen():
 	ports = InstantiatePorts()
 	seqNumber = 0
 	WaitTillReady(ports,seqNumber,False)
-
-
+    
 def InstantiatePorts():
-	raspberry = serial.Serial('COM1',115200,timeout=None)
-	coffee = serial.Serial('COM2',115200,timeout=None)
-	portsList = {'pi':raspberry,'cm':coffee} 
-	return portsList
+    raspberry = serial.Serial()
+    coffee = serial.Serial()
+    raspberry.port = 'COM1'
+    coffee.port = 'COM2'
+    raspberry.open()
+    coffee.open()
+    portsList = {'pi':raspberry,'cm':coffee} 
+    return portsList
 ############# Execute as script ###############
 if __name__ == "__main__":
-	MakeCoffee()
+    Listen()
