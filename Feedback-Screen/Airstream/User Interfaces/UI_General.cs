@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -32,14 +32,6 @@ namespace Airstream
         private static Color _labelGrayBackColor = Color.FromArgb(198, 194, 191);
         private static Color _labelGrayForeColor = Color.FromArgb(45, 45, 45);
         private static Font _labelGrayFont = new Font("Arial Bold", 16.0f);
-
-        /// <summary>
-        /// Elements that will be used for both Welcome-Screen and Feedback-Screen
-        /// </summary>
-        public UI_General()
-        {
-            
-        }
 
         public static Size GetSizeScreen()
         {
@@ -95,6 +87,10 @@ namespace Airstream
             ActiveForm.Close();
         }
 
+        /// <summary>
+        /// Elements that will be used for both Welcome and Feedback-Screen
+        /// </summary>
+        /// <param name="form"></param>
         public static void SetGeneralElements(Form form)
         {
             InitializeTimer();
