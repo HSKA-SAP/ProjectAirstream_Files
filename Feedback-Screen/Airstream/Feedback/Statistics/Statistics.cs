@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Airstream.Feedback.QuestionsAndAnswers;
 
 namespace Airstream.Feedback.Statistics
 {
@@ -16,7 +17,7 @@ namespace Airstream.Feedback.Statistics
         static List<Color> listAllColors = new List<Color>();
         static List<Color> listUsedColors = new List<Color>();
 
-        public static Color DetermineColor(float angle)
+        public static Color DetermineColor()
         {
             // result = null is not accepted, so I randomly took Color.White
             Color result = Color.White;
@@ -74,13 +75,36 @@ namespace Airstream.Feedback.Statistics
 
             for (int i = 0; i < data.Count; i++)
             {
-                G.FillPie(new SolidBrush(ShowStatistics.DetermineColor(PrevStart)), new Rectangle(0, 0, PieSize, PieSize), PrevStart, (data[i].Item2 / TotalValue) * 360);
+                G.FillPie(new SolidBrush(ShowStatistics.DetermineColor()), new Rectangle(0, 0, PieSize, PieSize), PrevStart, (data[i].Item2 / TotalValue) * 360);
                 PrevStart += (data[i].Item2 / TotalValue) * 360;
             }
             
             ShowStatistics.getUsedColors().Clear();
 
             return Result;
+        }
+    }
+
+    class CalculateStatistics
+    {
+        public static List<double> AnalyseQuestion(Question question)
+        {
+            List<double> result = new List<double>();
+            int totalVotesForQuestion = 0;
+            double percentOfTheVotes;
+
+            for(int i = 0; i < question.options.Count(); i++)
+            {
+                totalVotesForQuestion += question.options[i].countVotes;
+            }
+
+            foreach(Answer a in question.options)
+            {
+                percentOfTheVotes = a.countVotes / totalVotesForQuestion;
+                result.Add(Math.Round(percentOfTheVotes, 2)); // ==> Round to 2 decimal places
+            }
+
+            return result;
         }
     }
 }
