@@ -61,7 +61,7 @@ namespace Airstream.Feedback.Statistics
     {
         public Bitmap DrawPieChart(List<Tuple<string, float>> data)
         {
-            int PieSize = 300;
+            int PieSize = (Int32)(UI_General.GetSizeScreen().Width / 6.4);
             float PrevStart = 0;
 
             Bitmap Result = new Bitmap(PieSize, PieSize);
