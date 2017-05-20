@@ -106,35 +106,35 @@ namespace Airstream
             Controls.Add(_labelFeedbackWhatOthersHadToSay);
 
             _labelBarGraphOption1 = new Label();
-            _labelBarGraphOption1.BackColor = ShowStatistics.DetermineColor(0);
+            _labelBarGraphOption1.BackColor = ShowStatistics.DetermineColor();
             _labelBarGraphOption1.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.51));
             _labelBarGraphOption1.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.16), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.032));
 
             Controls.Add(_labelBarGraphOption1);
 
             _labelBarGraphOption2 = new Label();
-            _labelBarGraphOption2.BackColor = ShowStatistics.DetermineColor(0);
+            _labelBarGraphOption2.BackColor = ShowStatistics.DetermineColor();
             _labelBarGraphOption2.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.56));
             _labelBarGraphOption2.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.016), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.032));
 
             Controls.Add(_labelBarGraphOption2);
 
             _labelBarGraphOption3 = new Label();
-            _labelBarGraphOption3.BackColor = ShowStatistics.DetermineColor(0);
+            _labelBarGraphOption3.BackColor = ShowStatistics.DetermineColor();
             _labelBarGraphOption3.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.61));
             _labelBarGraphOption3.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.076), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.032));
 
             Controls.Add(_labelBarGraphOption3);
 
             _labelBarGraphOption4 = new Label();
-            _labelBarGraphOption4.BackColor = ShowStatistics.DetermineColor(0);
+            _labelBarGraphOption4.BackColor = ShowStatistics.DetermineColor();
             _labelBarGraphOption4.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.66));
             _labelBarGraphOption4.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.122), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.032));
 
             Controls.Add(_labelBarGraphOption4);
 
             _labelBarGraphOption5 = new Label();
-            _labelBarGraphOption5.BackColor = ShowStatistics.DetermineColor(0);
+            _labelBarGraphOption5.BackColor = ShowStatistics.DetermineColor();
             _labelBarGraphOption5.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.71));
             _labelBarGraphOption5.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.092), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.032));
 
@@ -149,6 +149,7 @@ namespace Airstream
             _labelFeedbackQuestion.Text = _labelFeedbackQuestionText;
 
             Controls.Add(_labelFeedbackQuestion);
+
             
             _labelBarGraphOption1.BringToFront();
             _labelBarGraphOption2.BringToFront();
