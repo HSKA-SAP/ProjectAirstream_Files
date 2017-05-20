@@ -61,27 +61,27 @@ namespace Airstream.Feedback.Statistics
     {
         public Bitmap DrawPieChart(List<Tuple<string, float>> data)
         {
-            int PieSize = (Int32)(UI_General.GetSizeScreen().Width / 6.4);
-            float PrevStart = 0;
+            int pieSize = (Int32)(UI_General.GetSizeScreen().Width / 6.4);
+            float prevStart = 0;
 
-            Bitmap Result = new Bitmap(PieSize, PieSize);
-            Graphics G = Graphics.FromImage(Result);
+            Bitmap result = new Bitmap(pieSize, pieSize);
+            Graphics g = Graphics.FromImage(result);
 
-            float TotalValue = 0;
+            float totalValue = 0;
             for (int i = 0; i < data.Count; i++)
             {
-                TotalValue += data[i].Item2;
+                totalValue += data[i].Item2;
             }
 
             for (int i = 0; i < data.Count; i++)
             {
-                G.FillPie(new SolidBrush(ShowStatistics.DetermineColor()), new Rectangle(0, 0, PieSize, PieSize), PrevStart, (data[i].Item2 / TotalValue) * 360);
-                PrevStart += (data[i].Item2 / TotalValue) * 360;
+                g.FillPie(new SolidBrush(ShowStatistics.DetermineColor()), new Rectangle(0, 0, pieSize, pieSize), prevStart, (data[i].Item2 / totalValue) * 360);
+                prevStart += (data[i].Item2 / totalValue) * 360;
             }
             
             ShowStatistics.getUsedColors().Clear();
 
-            return Result;
+            return result;
         }
     }
 
