@@ -62,14 +62,19 @@ namespace Airstream.Feedback.QuestionsAndAnswers
             _countVotes = 0;
         }
 
-        public static void SetDateTimeVote(Answer answer)
+        public void SetDateTimeVote()
         {
-            answer._dateTimeVote = DateTime.Now;
+            _dateTimeVote = DateTime.Now;
         }
 
         public static int GetCountVotes()
         {
             return _countVotes;
+        }
+
+        public void AddCountVote()
+        {
+            _countVotes++;
         }
     }
 }
