@@ -12,9 +12,11 @@ namespace Airstream.Feedback.Voters
 
         private long _id;
         private List<Answer> _givenAnswers;
+        private DateTime _dateTimeVote;
 
         public long id { get { return _id; } }
         public List<Answer> givenAnswers { get { return _givenAnswers; } }
+        public DateTime dateTimeVote { get { return _dateTimeVote; } }
 
         public Voter(long id)
         {
@@ -29,9 +31,14 @@ namespace Airstream.Feedback.Voters
             return listAllVoters;
         }
 
+        public void SetDateTimeVote()
+        {
+            _dateTimeVote = DateTime.Now;
+        }
+
         public void AddGivenAnswer(Voter voter, Answer answer)
         {
-            answer.SetDateTimeVote();
+            SetDateTimeVote();
             voter._givenAnswers.Add(answer);
             answer.AddCountVote();
         }
