@@ -1,8 +1,0 @@
-c:\users\bwpc\documents\visual studio 2017\Projects\Airstream\Airstream\bin\Debug\Airstream.exe.config
-c:\users\bwpc\documents\visual studio 2017\Projects\Airstream\Airstream\bin\Debug\Airstream.exe
-c:\users\bwpc\documents\visual studio 2017\Projects\Airstream\Airstream\bin\Debug\Airstream.pdb
-c:\users\bwpc\documents\visual studio 2017\Projects\Airstream\Airstream\obj\Debug\Airstream.csprojResolveAssemblyReference.cache
-c:\users\bwpc\documents\visual studio 2017\Projects\Airstream\Airstream\obj\Debug\Airstream.Properties.Resources.resources
-c:\users\bwpc\documents\visual studio 2017\Projects\Airstream\Airstream\obj\Debug\Airstream.csproj.GenerateResource.Cache
-c:\users\bwpc\documents\visual studio 2017\Projects\Airstream\Airstream\obj\Debug\Airstream.exe
-c:\users\bwpc\documents\visual studio 2017\Projects\Airstream\Airstream\obj\Debug\Airstream.pdb
