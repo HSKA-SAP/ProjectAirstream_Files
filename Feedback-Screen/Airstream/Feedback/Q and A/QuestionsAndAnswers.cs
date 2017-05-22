@@ -47,11 +47,9 @@ namespace Airstream.Feedback.QuestionsAndAnswers
     {
         private string _text;
         private static int _countVotes;
-        private DateTime _dateTimeVote;
 
         public string text { get { return _text; } }
         public int countVotes { get { return _countVotes; } }
-        public DateTime dateTimeVote { get { return _dateTimeVote; } }
 
         public Answer(string text)
         {
@@ -60,11 +58,6 @@ namespace Airstream.Feedback.QuestionsAndAnswers
 
             _text = text;
             _countVotes = 0;
-        }
-
-        public void SetDateTimeVote()
-        {
-            _dateTimeVote = DateTime.Now;
         }
 
         public static int GetCountVotes()
