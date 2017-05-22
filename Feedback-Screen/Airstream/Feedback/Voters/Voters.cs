@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,8 +31,9 @@ namespace Airstream.Feedback.Voters
 
         public void AddGivenAnswer(Voter voter, Answer answer)
         {
-            Answer.SetDateTimeVote(answer);
+            answer.SetDateTimeVote();
             voter._givenAnswers.Add(answer);
+            answer.AddCountVote();
         }
     }
 }
