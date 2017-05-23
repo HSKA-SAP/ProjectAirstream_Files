@@ -43,6 +43,11 @@ namespace Airstream
             return _screenDefaultFont;
         }
 
+        public static Label GetLabelGray()
+        {
+            return _labelGray;
+        }
+
         public static Color GetLabelGrayBackColor()
         {
             return _labelGrayBackColor;
@@ -80,6 +85,11 @@ namespace Airstream
         private static string SetLabelHeaderText()
         {
             return "      Willkommen im Airstream! \n__________________________\n        " + string.Format("{0:00}.{1:00}.{2:0000}     {3:00}:{4:00}:{5:00}", DateTime.Now.Day, DateTime.Now.Month, DateTime.Now.Year, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+        }
+
+        public static string GetLabelHeaderText()
+        {
+            return _labelHeaderText;
         }
 
         public static void Exit_Click(object sender, EventArgs e)
