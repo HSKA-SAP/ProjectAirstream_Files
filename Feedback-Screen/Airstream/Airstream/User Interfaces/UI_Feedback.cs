@@ -5,14 +5,19 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Airstream.Feedback.Statistics;
+using Airstream.Feedback.QuestionsAndAnswers;
+using Airstream.Feedback.Voters;
 
 namespace Airstream
 {
     public partial class UI_Feedback : Form
     {
+        //--- Evaluation Elements
+
         private Label _labelFeedbackQuestion;
         private string _labelFeedbackQuestionText = SetLabelFeedbackQuestionText();
 
@@ -36,11 +41,27 @@ namespace Airstream
         private RichTextBox _textBoxFeedbackMoreInfo;
         private Font _textBoxFeedbackMoreInfoFont = new Font("Arial Bold", 13.5f);
 
+        //--- Question and Answer Elements
+
+        private Button _buttonOption0;
+        private Button _buttonOption1;
+        private Button _buttonOption2;
+        private Button _buttonOption3;
+        private Button _buttonOption4;
+
+        private bool _choseOption = false;
+
+        Answer answer = new Answer("default");
+
         public UI_Feedback()
         {
             InitializeComponent();
 
+            Click += NextQuestion_Click;
+
             UI_General.SetGeneralElements(this);
+            UI_General.GetLabelGray().Click += NextQuestion_Click;
+            
 
             // START---FEEDBACK
 
@@ -164,6 +185,74 @@ namespace Airstream
             _labelFeedbackMoreInfo.BringToFront();
 
             ShowStatistics.getUsedColors().Clear();
+
+            // AUSWERTUNGS-ELEMENTE --- ENDE
+
+            // QUESTION & ANSWER - ELEMENTS
+            HideEvaluationElements();
+
+            _buttonOption0 = new Button();
+            _buttonOption0.BackColor = UI_General.GetLabelGrayBackColor();
+            _buttonOption0.Click += Option_Click;
+            _buttonOption0.ForeColor = UI_General.GetLabelGrayForeColor();
+            _buttonOption0.Font = UI_General.GetLabelGrayFont();
+            _buttonOption0.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.40));
+            _buttonOption0.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.2), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.06));
+            _buttonOption0.Text = "Option 1";
+
+            Controls.Add(_buttonOption0);
+
+            _buttonOption1 = new Button();
+            _buttonOption1.BackColor = UI_General.GetLabelGrayBackColor();
+            _buttonOption1.Click += Option_Click;
+            _buttonOption1.ForeColor = UI_General.GetLabelGrayForeColor();
+            _buttonOption1.Font = UI_General.GetLabelGrayFont();
+            _buttonOption1.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.48));
+            _buttonOption1.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.2), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.06));
+            _buttonOption1.Text = "Option 2";
+
+            Controls.Add(_buttonOption1);
+
+            _buttonOption2 = new Button();
+            _buttonOption2.BackColor = UI_General.GetLabelGrayBackColor();
+            _buttonOption2.Click += Option_Click;
+            _buttonOption2.ForeColor = UI_General.GetLabelGrayForeColor();
+            _buttonOption2.Font = UI_General.GetLabelGrayFont();
+            _buttonOption2.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.56));
+            _buttonOption2.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.2), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.06));
+            _buttonOption2.Text = "Option 3";
+
+            Controls.Add(_buttonOption2);
+
+            _buttonOption3 = new Button();
+            _buttonOption3.BackColor = UI_General.GetLabelGrayBackColor();
+            _buttonOption3.Click += Option_Click;
+            _buttonOption3.ForeColor = UI_General.GetLabelGrayForeColor();
+            _buttonOption3.Font = UI_General.GetLabelGrayFont();
+            _buttonOption3.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.64));
+            _buttonOption3.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.2), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.06));
+            _buttonOption3.Text = "Option 4";
+
+            Controls.Add(_buttonOption3);
+
+            _buttonOption4 = new Button();
+            _buttonOption4.BackColor = UI_General.GetLabelGrayBackColor();
+            _buttonOption4.Click += Option_Click;
+            _buttonOption4.ForeColor = UI_General.GetLabelGrayForeColor();
+            _buttonOption4.Font = UI_General.GetLabelGrayFont();
+            _buttonOption4.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.72));
+            _buttonOption4.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.2), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.06));
+            _buttonOption4.Text = "Option 5";
+
+            Controls.Add(_buttonOption4);
+
+            _buttonOption0.BringToFront();
+            _buttonOption1.BringToFront();
+            _buttonOption2.BringToFront();
+            _buttonOption3.BringToFront();
+            _buttonOption4.BringToFront();
+
+            StartFeedback();
         }
 
         private static string SetLabelFeedbackQuestionText()
@@ -174,6 +263,103 @@ namespace Airstream
         private static string SetTextBoxFeedbackMoreInfoText()
         {
             return "Hier noch mehr Interessantes:\n\n35% der Wähler denken das X das Beste hier im Airstream ist.\n\n25% denken Y ist das interessanteste und\n\n21% bevorzugen Z.\n\nVielen Dank für Ihr Feedback. Es hilft uns dabei uns und unsere Arbeit hier im Airstream zu verbessern.";
+        }
+
+        private void HideEvaluationElements()
+        {
+            _labelFeedbackMoreInfo.Visible = false;
+            _textBoxFeedbackMoreInfo.Visible = false;
+            _labelFeedbackFavorites.Visible = false;
+            _pictureBoxFeedbackFavorites.Visible = false;
+            _labelFeedbackWhatOthersHadToSay.Visible = false;
+            _labelBarGraphOption1.Visible = false;
+            _labelBarGraphOption2.Visible = false;
+            _labelBarGraphOption3.Visible = false;
+            _labelBarGraphOption4.Visible = false;
+            _labelBarGraphOption5.Visible = false;
+            //_labelFeedbackQuestion.Visible = false;
+        }
+
+        private void ShowEvaluationElements()
+        {
+            _labelFeedbackMoreInfo.Visible = true;
+            _textBoxFeedbackMoreInfo.Visible = true;
+            _labelFeedbackFavorites.Visible = true;
+            _pictureBoxFeedbackFavorites.Visible = true;
+            _labelFeedbackWhatOthersHadToSay.Visible = true;
+            _labelBarGraphOption1.Visible = true;
+            _labelBarGraphOption2.Visible = true;
+            _labelBarGraphOption3.Visible = true;
+            _labelBarGraphOption4.Visible = true;
+            _labelBarGraphOption5.Visible = true;
+            _labelFeedbackQuestion.Visible = true;
+        }
+
+        private void HideQandAElements()
+        {
+            _buttonOption0.Visible = false;
+            _buttonOption1.Visible = false;
+            _buttonOption2.Visible = false;
+            _buttonOption3.Visible = false;
+            _buttonOption4.Visible = false;
+        }
+
+        private void ShowQandAElements()
+        {
+            _buttonOption0.Visible = true;
+            _buttonOption1.Visible = true;
+            _buttonOption2.Visible = true;
+            _buttonOption3.Visible = true;
+            _buttonOption4.Visible = true;
+        }
+
+        public void StartFeedback()
+        {
+            foreach (Question q in Question.GetAllQuestion())
+            {
+                if (_choseOption == false)
+                {
+                    _labelFeedbackQuestion.Text = q.question;
+                    _buttonOption0.Text = q.options[0].text;
+                    _buttonOption1.Text = q.options[1].text;
+                    _buttonOption2.Text = q.options[2].text;
+                    _buttonOption3.Text = q.options[3].text;
+                    _buttonOption4.Text = q.options[4].text;
+                }
+            }
+        }
+
+        private void Option_Click(object sender, EventArgs e)
+        {
+            Button clickedButton = (Button)sender;
+
+            foreach(Answer a in Answer.GetAllAnswers())
+            {
+                if (clickedButton.Text == a.text)
+                {
+                    answer = a;
+                    Voter.GetAllVoters()[0].AddGivenAnswer(Voter.GetAllVoters()[0], a);
+
+                    //MessageBox.Show("Votes für '" + clickedButton.Text + "': " + answer.countVotes);
+
+                    ShowEvaluation();
+                }
+            }
+        }
+
+        private void NextQuestion_Click(object sender, EventArgs e)
+        {
+            if (_labelFeedbackMoreInfo.Visible == true)
+            {
+                ShowQandAElements();
+                HideEvaluationElements();
+            }
+        }
+
+        public void ShowEvaluation()
+        {
+            HideQandAElements();
+            ShowEvaluationElements();
         }
     }
 }
