@@ -8,7 +8,7 @@ namespace Airstream.Feedback.Voters
 {
     class Voter
     {
-        private List<Voter> listAllVoters = new List<Voter>();
+        private static List<Voter> listAllVoters = new List<Voter>();
 
         private long _id;
         private List<Answer> _givenAnswers;
@@ -26,7 +26,7 @@ namespace Airstream.Feedback.Voters
             listAllVoters.Add(this);
         }
 
-        public List<Voter> GetAllVoters()
+        public static List<Voter> GetAllVoters()
         {
             return listAllVoters;
         }
