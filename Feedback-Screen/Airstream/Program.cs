@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Airstream.Feedback.QuestionsAndAnswers;
+using Airstream.Feedback.Voters;
 
 namespace Airstream
 {
@@ -16,6 +17,7 @@ namespace Airstream
         static void Main()
         {
             Question.CreateTheFeedbackQuestions();
+            Voter TestVoter = new Voter(12345);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
