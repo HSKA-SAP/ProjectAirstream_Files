@@ -22,12 +22,12 @@ namespace Airstream.Feedback.Statistics
             // result = null is not accepted, so I randomly took Color.White
             Color result = Color.White;
 
-            listAllColors.Add(Color.FromArgb(0, 153, 204));
-            listAllColors.Add(Color.FromArgb(171, 231, 255));
-            listAllColors.Add(Color.FromArgb(33, 107, 172));
-            listAllColors.Add(Color.FromArgb(0, 255, 204));
-            listAllColors.Add(Color.FromArgb(0, 74, 139));
-            listAllColors.Add(Color.FromArgb(117, 177, 201));
+            listAllColors.Add(Color.FromArgb(91, 186, 230));
+            listAllColors.Add(Color.FromArgb(182, 217, 87));
+            listAllColors.Add(Color.FromArgb(250, 196, 100));
+            listAllColors.Add(Color.FromArgb(91, 186, 230));
+            listAllColors.Add(Color.FromArgb(182, 217, 87));
+            listAllColors.Add(Color.FromArgb(250, 196, 100));
 
             for (int i = 0; i < (listAllColors.Count - 1); i++)
             {
