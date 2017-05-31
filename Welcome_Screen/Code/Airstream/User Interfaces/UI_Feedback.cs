@@ -672,6 +672,7 @@ namespace Airstream
         private void backBtn_Click(object sender, EventArgs e)
         {
             PrevQuestion();
+            this.ActiveControl = null;
         }
 
         private void LeaveOption(object sender, EventArgs e)
