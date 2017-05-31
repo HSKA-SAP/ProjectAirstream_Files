@@ -417,6 +417,7 @@ namespace Airstream
                     //}
                 }
             }
+            clickedButton.Focus();
             _currentQuestion++;
 
             Button answerGiven = (Button)sender;
@@ -428,7 +429,6 @@ namespace Airstream
             Debug.Print(q);
             db.InsertUpdateDelete(q);
             UpdateFeedbackID();
-            NextQuestion();
         }
 
         private void Favourites_Click(object sender, EventArgs e)
@@ -565,14 +565,7 @@ namespace Airstream
 
         private void fwdBtn_Click(object sender, EventArgs e)
         {
-            //if (_labelFeedbackMoreInfo.Visible == true)
-            //{
-            //    _choseOptionQuestion0 = false;
-            //    _choseOptionQuestion1 = false;
-
-            //    ShowQandAElements();
-            //    HideEvaluationElements();
-            //}
+            NextQuestion();
         }
         private void backBtn_Click(object sender, EventArgs e)
         {
