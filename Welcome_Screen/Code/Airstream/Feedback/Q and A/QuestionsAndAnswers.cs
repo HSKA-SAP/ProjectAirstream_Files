@@ -30,8 +30,6 @@ namespace Airstream.Feedback.QuestionsAndAnswers
 
     public class Answer
     {
-        private static List<Answer> listAllAnswers = new List<Answer>();
-
         private string _text;
         private static int _countVotes;
 
@@ -44,24 +42,8 @@ namespace Airstream.Feedback.QuestionsAndAnswers
                 throw new Exception("No text existing!");
 
             _text = text;
-            _countVotes = 0;
 
-            listAllAnswers.Add(this);
         }
         
-        public static List<Answer> GetAllAnswers()
-        {
-            return listAllAnswers;
-        }
-
-        public static int GetCountVotes(Answer answer)
-        {
-            return answer.countVotes;
-        }
-
-        public void AddCountVote()
-        {
-            _countVotes++;
-        }
     }
 }

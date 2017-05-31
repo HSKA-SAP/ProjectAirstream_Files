@@ -19,10 +19,11 @@ namespace Airstream
 {
     public partial class UI_Feedback : Form
     {
-        //--- Evaluation Elements
-        #region
+        // Instatiate all elements
+
+        #region Instantiate all elements
         private Label _labelFeedbackQuestion;
-        private string _labelFeedbackQuestionText = SetLabelFeedbackQuestionText();
+        private string _labelFeedbackQuestionText;
         private Font _labelFeedbackQuestionFont = new Font("Arial Bold", 23.0f);
         private Color _labelFeedbackQuestionForeColor = Color.FromArgb(255, 255, 255);
 
@@ -57,29 +58,33 @@ namespace Airstream
         private Color _buttonOptionBackColor = Color.FromArgb(255, 255, 255);
         private  List<Question> _questions;
         private  int _currentQuestion = 0;
+        private int _localOptionClick = 0;
         private int _feedbackID = 0;
         private string projectFolder = "..\\..\\..\\";
         PictureBox _backBtnFeedback;
         PictureBox _fwdBtnFeedback;
         #endregion
 
-        public UI_Feedback(List<Question> questions)
+        private Voter _currentVoter;
+
+        /// <summary>
+        /// Constructor for the Feedback UI which takes in the list of questions as its only parameter
+        /// </summary>
+        /// <param name="questions"></param>
+        
+        public UI_Feedback(List<Question> questions, Voter currentVoter)
         {
             InitializeComponent();
-
-            Click += NextFeedback_Click;
-
+            //Create a blank form to work with 
             UI_General.SetGeneralElements(this);
-            UI_General.GetLabelGray().Click += NextFeedback_Click;
-            _questions = questions;
+            _questions = questions; //instantiate form with questions from UI_Feedback.cs
+            _currentVoter = currentVoter;
             UpdateFeedbackID();
-            // START---FEEDBACK
 
-#region
-            // AUSWERTUNGS-ELEMENTE
+#region assign values to elements
+            // Create all labels/elements needed
             _labelFeedbackMoreInfo = new Label();
             _labelFeedbackMoreInfo.BackColor = UI_General.GetLabelGrayBackColor();
-            _labelFeedbackMoreInfo.Click += NextFeedback_Click;
             _labelFeedbackMoreInfo.ForeColor = UI_General.GetLabelGrayForeColor();
             _labelFeedbackMoreInfo.Font = UI_General.GetLabelGrayFont();
             _labelFeedbackMoreInfo.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.698), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.40));
@@ -90,7 +95,6 @@ namespace Airstream
 
             _textBoxFeedbackMoreInfo = new RichTextBox();
             _textBoxFeedbackMoreInfo.BackColor = UI_General.GetLabelGrayBackColor();
-            _textBoxFeedbackMoreInfo.Click += NextFeedback_Click;
             _textBoxFeedbackMoreInfo.Cursor = Cursors.No;
             _textBoxFeedbackMoreInfo.ForeColor = UI_General.GetLabelGrayForeColor();
             _textBoxFeedbackMoreInfo.Font = _textBoxFeedbackMoreInfoFont;
@@ -104,7 +108,6 @@ namespace Airstream
 
             _labelFeedbackFavorites = new Label();
             _labelFeedbackFavorites.BackColor = UI_General.GetLabelGrayBackColor();
-            _labelFeedbackFavorites.Click += NextFeedback_Click;
             _labelFeedbackFavorites.ForeColor = UI_General.GetLabelGrayForeColor();
             _labelFeedbackFavorites.Font = UI_General.GetLabelGrayFont();
             _labelFeedbackFavorites.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.45), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.40));
@@ -136,7 +139,6 @@ namespace Airstream
 
             _labelFeedbackWhatOthersHadToSay = new Label();
             _labelFeedbackWhatOthersHadToSay.BackColor = UI_General.GetLabelGrayBackColor();
-            _labelFeedbackWhatOthersHadToSay.Click += NextFeedback_Click;
             _labelFeedbackWhatOthersHadToSay.ForeColor = UI_General.GetLabelGrayForeColor();
             _labelFeedbackWhatOthersHadToSay.Font = UI_General.GetLabelGrayFont();
             _labelFeedbackWhatOthersHadToSay.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.40));
@@ -148,7 +150,6 @@ namespace Airstream
 
             _labelBarGraphOption1 = new Label();
             _labelBarGraphOption1.BackColor = ShowStatistics.DetermineColor();
-            _labelBarGraphOption1.Click += NextFeedback_Click;
             _labelBarGraphOption1.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.51));
             _labelBarGraphOption1.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.16), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.032));
             _labelBarGraphOption1.Visible = false;
@@ -157,7 +158,6 @@ namespace Airstream
 
             _labelBarGraphOption2 = new Label();
             _labelBarGraphOption2.BackColor = ShowStatistics.DetermineColor();
-            _labelBarGraphOption2.Click += NextFeedback_Click;
             _labelBarGraphOption2.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.56));
             _labelBarGraphOption2.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.016), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.032));
             _labelBarGraphOption2.Visible = false;
@@ -174,7 +174,6 @@ namespace Airstream
 
             _labelBarGraphOption4 = new Label();
             _labelBarGraphOption4.BackColor = ShowStatistics.DetermineColor();
-            _labelBarGraphOption4.Click += NextFeedback_Click;
             _labelBarGraphOption4.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.66));
             _labelBarGraphOption4.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.122), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.032));
             _labelBarGraphOption4.Visible = false;
@@ -183,7 +182,6 @@ namespace Airstream
 
             _labelBarGraphOption5 = new Label();
             _labelBarGraphOption5.BackColor = ShowStatistics.DetermineColor();
-            _labelBarGraphOption5.Click += NextFeedback_Click;
             _labelBarGraphOption5.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.093), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.71));
             _labelBarGraphOption5.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.092), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.032));
             _labelBarGraphOption5.Visible = false;
@@ -192,18 +190,20 @@ namespace Airstream
 
             _backBtnFeedback = new PictureBox();
             _backBtnFeedback.BackColor = Color.Transparent;
-            _backBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\back.png");
+            _backBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\back_disabled.png");
             _backBtnFeedback.BackgroundImageLayout = ImageLayout.Stretch;
             _backBtnFeedback.Size = new Size(100, 100);
-            _backBtnFeedback.Top += 115;
+            _backBtnFeedback.Location = new Point(0, Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.165));
             _backBtnFeedback.Click += backBtn_Click;
+            _backBtnFeedback.Enabled = false;
+
             _fwdBtnFeedback = new PictureBox();
             _fwdBtnFeedback.BackColor = Color.Transparent;
-            _fwdBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\forward.png");
+            _fwdBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\forward_disabled.png");
+            _fwdBtnFeedback.Enabled = false;
             _fwdBtnFeedback.BackgroundImageLayout = ImageLayout.Stretch;
             _fwdBtnFeedback.Size = new Size(100, 100);
-            _fwdBtnFeedback.Top += 115;
-            _fwdBtnFeedback.Left += 1150;
+            _fwdBtnFeedback.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.91), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.165));
             _fwdBtnFeedback.Click += fwdBtn_Click;
             _fwdBtnFeedback.Visible = true;
             _backBtnFeedback.Visible = true;
@@ -213,7 +213,6 @@ namespace Airstream
 
             // Feedback Question element
             _labelFeedbackQuestion = new Label();
-            _labelFeedbackQuestion.Click += NextFeedback_Click;
             _labelFeedbackQuestion.Font = _labelFeedbackQuestionFont;
             _labelFeedbackQuestion.Size = new Size(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.75), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.14));
             _labelFeedbackQuestion.Text = _labelFeedbackQuestionText;
@@ -310,37 +309,148 @@ namespace Airstream
             _buttonOption2.BringToFront();
             _buttonOption3.BringToFront();
             _buttonOption4.BringToFront();
-#endregion
+
+            _buttonOption0.Leave += LeaveOption;
+            _buttonOption1.Leave += LeaveOption;
+            _buttonOption2.Leave += LeaveOption;
+            _buttonOption3.Leave += LeaveOption;
+            _buttonOption4.Leave += LeaveOption;
+
+            #endregion
+            UnsetOptions();
+            //Begin the Feedback 
             StartFeedback();
 
         }
 
-        private static string SetLabelFeedbackQuestionText()
+ 
+
+        /// <summary>
+        /// Start the feedback process by calling the NextQuestion Function to display the first question with _currentQuestion = 0
+        /// </summary>
+        public void StartFeedback()
         {
-            return "HIER KÖNNTE IHRE FRAGE STEHEN? ;)";
+            DisplayQuestion();
+
         }
 
-        private static string SetTextBoxFeedbackMoreInfoText()
+        public void UnsetOptions()
         {
-            return "Hier noch mehr Interessantes:\n\n35% der Wähler denken das X das Beste hier im Airstream ist.\n\n25% denken Y ist das interessanteste und\n\n21% bevorzugen Z.\n\nVielen Dank für Ihr Feedback. Es hilft uns dabei uns und unsere Arbeit hier im Airstream zu verbessern.";
+            _buttonOption0.TabStop = false;
+            _buttonOption1.TabStop = false;
+            _buttonOption2.TabStop = false;
+            _buttonOption3.TabStop = false;
+            _buttonOption4.TabStop = false;
+
+        }
+        /// <summary>
+        /// A function to loop through the questions until they are all answered
+        /// </summary>
+        public void DisplayQuestion()
+        {
+            _fwdBtnFeedback.Enabled = false;
+            _fwdBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\forward_disabled.png");
+
+            #region loop through questions
+            if (_currentQuestion < _questions.Count && _currentQuestion >= 0)
+            {
+                _labelFeedbackQuestion.Text = _questions[_currentQuestion].question;
+                if (_currentQuestion == 0) //If it is the first question, display a different type of layout (images of different features in Airstream)
+                {
+
+                    _buttonOption0.Text = _questions[_currentQuestion].options[0].text;
+                    _buttonOption0.BackgroundImage = new Bitmap(projectFolder + @"Pictures\Compressed\alexalogodone.jpg");
+                    _buttonOption0.BackgroundImageLayout = ImageLayout.Stretch;
+                    _buttonOption1.Text = _questions[_currentQuestion].options[1].text;
+                    _buttonOption1.BackgroundImage = new Bitmap(projectFolder + @"Pictures\Compressed\netatmologodone.jpg");
+                    _buttonOption1.BackgroundImageLayout = ImageLayout.Stretch;
+                    _buttonOption2.Text = _questions[_currentQuestion].options[2].text;
+                    _buttonOption2.BackgroundImage = new Bitmap(projectFolder + @"Pictures\Compressed\touchtablelogodone.jpg");
+                    _buttonOption2.BackgroundImageLayout = ImageLayout.Stretch;
+                    _buttonOption3.Text = _questions[_currentQuestion].options[3].text;
+                    _buttonOption3.BackgroundImage = new Bitmap(projectFolder + @"Pictures\Compressed\welcomescreenlogodone.jpg");
+                    _buttonOption3.BackgroundImageLayout = ImageLayout.Stretch;
+                    _buttonOption4.Text = _questions[_currentQuestion].options[4].text;
+                    _buttonOption4.BackgroundImage = new Bitmap(projectFolder + @"Pictures\Compressed\digitalboardroomlogodone.jpg");
+                    _buttonOption4.BackgroundImageLayout = ImageLayout.Stretch;
+                    _backBtnFeedback.Enabled = false;
+                    _backBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\back_disabled.png");
+                }
+                else //If it is not the first question, display the default question and answer layout
+                {
+                    _buttonOption0.Text = _questions[_currentQuestion].options[0].text;
+                    _buttonOption0.BackgroundImage = null;
+                    _buttonOption1.Text = _questions[_currentQuestion].options[1].text;
+                    _buttonOption1.BackgroundImage = null;
+                    _buttonOption2.Text = _questions[_currentQuestion].options[2].text;
+                    _buttonOption2.BackgroundImage = null;
+                    _buttonOption3.Text = _questions[_currentQuestion].options[3].text;
+                    _buttonOption3.BackgroundImage = null;
+                    _buttonOption4.Text = _questions[_currentQuestion].options[4].text;
+                    _buttonOption4.BackgroundImage = null;
+                    _backBtnFeedback.Enabled = true;
+                    _backBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\back.png");
+
+                    if (_currentQuestion == _questions.Count - 1)
+                    {
+                        _fwdBtnFeedback.Enabled = false;
+                        _fwdBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\forward_disabled.png");
+                    }
+                }
+            }
+            else if(_currentQuestion < 0)
+            {
+                //do nothing
+            }
+            else if (_currentQuestion == _questions.Count) //If neither of these are true then all questions have been answered
+            {
+                AddAnswersToDB();
+                ShowEvaluation();
+            }
+            #endregion
         }
 
-        private void HideEvaluationElements()
+        public void NextQuestion()
         {
-            _labelFeedbackMoreInfo.Visible = false;
-            _textBoxFeedbackMoreInfo.Visible = false;
-            _labelFeedbackFavorites.Visible = false;
-            _pictureBoxFeedbackFavorites.Visible = false;
-            _labelFeedbackWhatOthersHadToSay.Visible = false;
-            _labelBarGraphOption1.Visible = false;
-            _labelBarGraphOption2.Visible = false;
-            _labelBarGraphOption3.Visible = false;
-            _labelBarGraphOption4.Visible = false;
-            _labelBarGraphOption5.Visible = false;
-            UI_General.GetLabelGray().Visible = false;
-            _labelFeedbackQuestion.BackColor = Color.Transparent;
-            _labelFeedbackQuestion.ForeColor = _labelFeedbackQuestionForeColor;
-            //_labelFeedbackQuestion.Visible = false;
+            _currentQuestion++;
+            _localOptionClick = 0;
+            DisplayQuestion();
+            this.ActiveControl = null;
+
+        }
+
+        public void PrevQuestion()
+        {
+            _currentQuestion--;
+            _localOptionClick = 0;
+            if(_currentQuestion <= 0)
+            {
+                _currentQuestion = 0;
+            }
+            Debug.Print(_currentQuestion.ToString());
+            DisplayQuestion();
+        }
+
+
+        public void AddAnswersToDB()
+        {
+            DatabaseConnection db = new DatabaseConnection();
+            for(int i =0; i < _currentVoter.givenAnswers.ToArray().Length; i++)
+            {
+                string q1 = "INSERT INTO feedback VALUES (";
+                string q2 = _feedbackID.ToString() + "," + i.ToString() + ",'" + _currentVoter.givenAnswers[i].text + "'";
+                string q3 = ")";
+                string q = q1 + q2 + q3;
+
+                db.InsertUpdateDelete(q);
+                UpdateFeedbackID();
+            }
+
+        }
+
+        public void ShowEvaluation()
+        {
+            ShowEvaluationElements();
         }
 
         private void ShowEvaluationElements()
@@ -360,8 +470,25 @@ namespace Airstream
             _labelFeedbackQuestion.BackColor = UI_General.GetLabelGrayBackColor();
             _labelFeedbackQuestion.ForeColor = Color.FromArgb(45, 45, 45);
             HideQandAElements();
-            _backBtnFeedback.Visible = false;
-            _fwdBtnFeedback.Visible = false;
+        }
+
+
+        private void HideEvaluationElements()
+        {
+            _labelFeedbackMoreInfo.Visible = false;
+            _textBoxFeedbackMoreInfo.Visible = false;
+            _labelFeedbackFavorites.Visible = false;
+            _pictureBoxFeedbackFavorites.Visible = false;
+            _labelFeedbackWhatOthersHadToSay.Visible = false;
+            _labelBarGraphOption1.Visible = false;
+            _labelBarGraphOption2.Visible = false;
+            _labelBarGraphOption3.Visible = false;
+            _labelBarGraphOption4.Visible = false;
+            _labelBarGraphOption5.Visible = false;
+            UI_General.GetLabelGray().Visible = false;
+            _labelFeedbackQuestion.BackColor = Color.Transparent;
+            _labelFeedbackQuestion.ForeColor = _labelFeedbackQuestionForeColor;
+            //_labelFeedbackQuestion.Visible = false;
         }
 
         private void HideQandAElements()
@@ -383,79 +510,16 @@ namespace Airstream
             _buttonOption4.Visible = true;
         }
 
-        public void StartFeedback()
+        private static string SetTextBoxFeedbackMoreInfoText()
         {
-            //Will start the question phase 
-            NextQuestion();
-            //Currently in the evaluation screen
-
-
+            return "Hier noch mehr Interessantes:\n\n35% der Wähler denken das X das Beste hier im Airstream ist.\n\n25% denken Y ist das interessanteste und\n\n21% bevorzugen Z.\n\nVielen Dank für Ihr Feedback. Es hilft uns dabei uns und unsere Arbeit hier im Airstream zu verbessern.";
         }
 
-        private void Option_Click(object sender, EventArgs e)
-        {
-            Button clickedButton = (Button)sender;
-            Answer answer;
-
-            foreach(Answer a in Answer.GetAllAnswers())
-            {
-                if (clickedButton.Text == a.text)
-                {
-                    answer = a;
-                    Voter.GetAllVoters()[0].AddGivenAnswer(Voter.GetAllVoters()[0], a);
-
-                    //MessageBox.Show("Votes für '" + clickedButton.Text + "': " + answer.countVotes);
-
-                    //if (_choseOptionQuestion1 == true)
-                    //{
-                    //    ShowEvaluation();
-                    //}
-
-                    //else
-                    //{
-                    //    //StartFeedback(0);
-                    //}
-                }
-            }
-            clickedButton.Focus();
-            _currentQuestion++;
-
-            Button answerGiven = (Button)sender;
-            DatabaseConnection db = new DatabaseConnection();
-            string q1 = "INSERT INTO feedback VALUES (";
-            string q2 = _feedbackID.ToString() + "," + _currentQuestion.ToString() + ",'" + answerGiven.Text + "'";
-            string q3 = ")";
-            string q = q1 + q2 + q3;
-            Debug.Print(q);
-            db.InsertUpdateDelete(q);
-            UpdateFeedbackID();
-        }
-
-        private void Favourites_Click(object sender, EventArgs e)
-        {
-            ClearForFavourites();
-            // Array to store percentages
-            Dictionary<string, float> data = new Dictionary<string, float>();
-            data = GetFavoritesData();
-
-            PieChart A = new PieChart();
-            List<Tuple<string, float>> B = new List<Tuple<string, float>>();
-
-            B.Add(new Tuple<string, float>("Alexa", data["Alexa"]));
-            B.Add(new Tuple<string, float>("NetAtmo", data["NetAtmo"]));
-            B.Add(new Tuple<string, float>("Digital Boardroom", data["Digital Boardroom"]));
-            B.Add(new Tuple<string, float>("55 Zoll-Tisch", data["55 Zoll-Tisch"]));
-            B.Add(new Tuple<string, float>("Welcome-Screen", data["Welcome-Screen"]));
-            Bitmap pieChart = A.DrawPieChart(B);
-            
-            _pictureBoxFeedbackFavorites.BackgroundImage = pieChart;
-            _pictureBoxFeedbackFavorites.Visible = true;
-        }
 
         public Dictionary<string, float> GetFavoritesData()
         {
-            int[] pData = new int[5]; 
-            string[] answers = new string[] { "Alexa", "NetAtmo", "Digital Boardroom", "55 Zoll-Tisch", "Welcome-Screen"};
+            int[] pData = new int[5];
+            string[] answers = new string[] { "Alexa", "NetAtmo", "Digital Boardroom", "55 Zoll-Tisch", "Welcome-Screen" };
             string defaultQuery;
             defaultQuery = @"SELECT Count(feedback.feedbackAnswer)
                              FROM feedback
@@ -464,7 +528,7 @@ namespace Airstream
 
             int i = 0;
             float total = 0;
-            foreach(string answer in answers)
+            foreach (string answer in answers)
             {
                 string q = answer;
                 string query = defaultQuery + " '" + q + "';";
@@ -498,6 +562,8 @@ namespace Airstream
             _labelFeedbackQuestionText = "Lieblings-Features des Airstream";
             _labelFeedbackQuestion.Text = _labelFeedbackQuestionText;
         }
+
+
         public void UpdateFeedbackID()
         {
             DatabaseConnection db = new DatabaseConnection();
@@ -507,83 +573,113 @@ namespace Airstream
             _feedbackID = length;
         }
 
-        public  void NextQuestion()
-        {
-            if (_currentQuestion < _questions.Count)
-            {
-                _labelFeedbackQuestion.Text = _questions[_currentQuestion].question;
-                if (_currentQuestion == 0)
-                {
-                    string projectFolder = "..\\..\\..\\";
 
-                    _buttonOption0.Text = _questions[_currentQuestion].options[0].text;
-                    _buttonOption0.BackgroundImage = new Bitmap(projectFolder+ @"Pictures\Compressed\alexalogodone.jpg");
-                    _buttonOption0.BackgroundImageLayout = ImageLayout.Stretch;
-                    _buttonOption1.Text = _questions[_currentQuestion].options[1].text;
-                    _buttonOption1.BackgroundImage = new Bitmap(projectFolder + @"Pictures\Compressed\netatmologodone.jpg");
-                    _buttonOption1.BackgroundImageLayout = ImageLayout.Stretch;
-                    _buttonOption2.Text = _questions[_currentQuestion].options[2].text;
-                    _buttonOption2.BackgroundImage = new Bitmap(projectFolder + @"Pictures\Compressed\touchtablelogodone.jpg");
-                    _buttonOption2.BackgroundImageLayout = ImageLayout.Stretch;
-                    _buttonOption3.Text = _questions[_currentQuestion].options[3].text;
-                    _buttonOption3.BackgroundImage = new Bitmap(projectFolder + @"Pictures\Compressed\welcomescreenlogodone.jpg");
-                    _buttonOption3.BackgroundImageLayout = ImageLayout.Stretch;
-                    _buttonOption4.Text = _questions[_currentQuestion].options[4].text;
-                    _buttonOption4.BackgroundImage = new Bitmap(projectFolder + @"Pictures\Compressed\digitalboardroomlogodone.jpg");
-                    _buttonOption4.BackgroundImageLayout = ImageLayout.Stretch;
-                }
-                else
-                {
-                    _buttonOption0.Text = _questions[_currentQuestion].options[0].text;
-                    _buttonOption0.BackgroundImage = null;
-                    _buttonOption1.Text = _questions[_currentQuestion].options[1].text;
-                    _buttonOption1.BackgroundImage = null;
-                    _buttonOption2.Text = _questions[_currentQuestion].options[2].text;
-                    _buttonOption2.BackgroundImage = null;
-                    _buttonOption3.Text = _questions[_currentQuestion].options[3].text;
-                    _buttonOption3.BackgroundImage = null;
-                    _buttonOption4.Text = _questions[_currentQuestion].options[4].text;
-                    _buttonOption4.BackgroundImage = null;
-                }
-            }
-            else if (_currentQuestion == _questions.Count)
-            {
-                ShowEvaluation();
-            }
-        }
-        private void NextFeedback_Click(object sender, EventArgs e)
-        {
-            //if (_labelFeedbackMoreInfo.Visible == true)
-            //{
-            //    _choseOptionQuestion0 = false;
-            //    _choseOptionQuestion1 = false;
 
-            //    ShowQandAElements();
-            //    HideEvaluationElements();
-            //}
+        //-//-//-//           EVENT HANDLERS       //-//-//-//
+
+        /// <summary>
+        /// An event handler for clicking any of the options to a question
+        /// </summary>
+        private void Option_Click(object sender, EventArgs e)
+        {
+            _localOptionClick += 1;
+
+            Button clickedButton = (Button)sender;
+
+            clickedButton.Focus();
+
+            Button answerGivenBtn = (Button)sender;
+            Answer answer = new Answer(answerGivenBtn.Text);
+            _currentVoter.AddGivenAnswer(answer);
+            Debug.Print(_buttonOption0.ContainsFocus.ToString());
+            List<Button> unFocusedBtns = new List<Button>();
+            if(_localOptionClick == 1)
+            {
+                HighlightFocusedBtn(clickedButton);
+                _fwdBtnFeedback.Enabled = true;
+                _fwdBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\forward.png");
+
+            }
+            if (_localOptionClick == 2)
+            {
+                UnHighlightFocusedBtn(clickedButton);
+                _localOptionClick = 0;
+                _fwdBtnFeedback.Enabled = false;
+                _fwdBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\forward_disabled.png");
+
+            }
+
         }
 
+        public void HighlightFocusedBtn(Button btnToHighlight)
+        {
+            btnToHighlight.FlatStyle = FlatStyle.Flat;
+            btnToHighlight.FlatAppearance.BorderColor = Color.Blue;
+            btnToHighlight.FlatAppearance.BorderSize = 3;
+        }
+
+        public void UnHighlightFocusedBtn(Button btnToHighlight)
+        {
+            btnToHighlight.FlatStyle = FlatStyle.Standard;
+            this.ActiveControl = null;
+
+        }
+
+
+        /// <summary>
+        ///  An event handler for clicking the pie chart on the summary screen
+        /// </summary>
+        private void Favourites_Click(object sender, EventArgs e)
+        {
+            ClearForFavourites();
+            // Array to store percentages
+            Dictionary<string, float> data = new Dictionary<string, float>();
+            data = GetFavoritesData();
+
+            PieChart A = new PieChart();
+            List<Tuple<string, float>> B = new List<Tuple<string, float>>();
+
+            B.Add(new Tuple<string, float>("Alexa", data["Alexa"]));
+            B.Add(new Tuple<string, float>("NetAtmo", data["NetAtmo"]));
+            B.Add(new Tuple<string, float>("Digital Boardroom", data["Digital Boardroom"]));
+            B.Add(new Tuple<string, float>("55 Zoll-Tisch", data["55 Zoll-Tisch"]));
+            B.Add(new Tuple<string, float>("Welcome-Screen", data["Welcome-Screen"]));
+            Bitmap pieChart = A.DrawPieChart(B);
+            
+            _pictureBoxFeedbackFavorites.BackgroundImage = pieChart;
+            _pictureBoxFeedbackFavorites.Visible = true;
+        }
+
+        /// <summary>
+        ///  An event handler for clicking on the forward button that is present during feedback
+        /// </summary>
         private void fwdBtn_Click(object sender, EventArgs e)
         {
-            NextQuestion();
+            if(_buttonOption0.ContainsFocus == true || _buttonOption1.ContainsFocus == true || _buttonOption2.ContainsFocus == true || _buttonOption3.ContainsFocus == true || _buttonOption4.ContainsFocus == true)
+            {
+                NextQuestion();
+            }
+            else
+            {
+
+            }
+
         }
+
+        /// <summary>
+        ///  An event handler for clicking on the back button that is present during feedback
+        /// </summary>
         private void backBtn_Click(object sender, EventArgs e)
         {
-            //if (_labelFeedbackMoreInfo.Visible == true)
-            //{
-            //    _choseOptionQuestion0 = false;
-            //    _choseOptionQuestion1 = false;
-
-            //    ShowQandAElements();
-            //    HideEvaluationElements();
-            //}
+            PrevQuestion();
         }
 
-
-        public void ShowEvaluation()
+        private void LeaveOption(object sender, EventArgs e)
         {
-            ShowEvaluationElements();
+            Button currentBtn = (Button)sender;
+            currentBtn.FlatStyle = FlatStyle.Standard;
         }
+
 
 
     }

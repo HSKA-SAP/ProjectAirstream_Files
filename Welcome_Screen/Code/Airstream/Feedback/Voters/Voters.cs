@@ -6,7 +6,7 @@ using Airstream.Feedback.QuestionsAndAnswers;
 
 namespace Airstream.Feedback.Voters
 {
-    class Voter
+    public class Voter
     {
         private static List<Voter> listAllVoters = new List<Voter>();
 
@@ -22,25 +22,18 @@ namespace Airstream.Feedback.Voters
         {
             _id = id;
             _givenAnswers = new List<Answer>();
-
-            listAllVoters.Add(this);
         }
 
-        public static List<Voter> GetAllVoters()
-        {
-            return listAllVoters;
-        }
 
         public void SetDateTimeVote()
         {
             _dateTimeVote = DateTime.Now;
         }
 
-        public void AddGivenAnswer(Voter voter, Answer answer)
+        public void AddGivenAnswer(Answer answer)
         {
             SetDateTimeVote();
-            voter._givenAnswers.Add(answer);
-            answer.AddCountVote();
+            _givenAnswers.Add(answer);
         }
     }
 }

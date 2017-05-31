@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace Airstream
 {
@@ -107,9 +108,11 @@ namespace Airstream
             form.BackgroundImageLayout = ImageLayout.Stretch;
             // BEGINN ELEMENTE
             _labelHeader = new Label();
-            _labelHeader.BackColor = _labelHeaderBackColor;
+            _labelHeader.BackColor = Color.Transparent;
             _labelHeader.Font = _screenDefaultFont;
             _labelHeader.ForeColor = _screenForeColor;
+
+
             _labelHeader.Location = new Point(Convert.ToInt32(_sizeScreen.Width * 0.06), Convert.ToInt32(_sizeScreen.Height * 0.05));
             _labelHeader.Size = new Size(Convert.ToInt32(_sizeScreen.Width * 0.3), Convert.ToInt32(_sizeScreen.Height * 0.2));
             _labelHeader.Text = _labelHeaderText;

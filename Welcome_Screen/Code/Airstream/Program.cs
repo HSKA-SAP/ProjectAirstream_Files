@@ -23,7 +23,7 @@ namespace Airstream
             List<Question> questions = QuestionLogic.CreateTheFeedbackQuestions();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new UI_Feedback(questions));
+            Application.Run(new UI_Feedback(questions,TestVoter));
         }
     }
 }
