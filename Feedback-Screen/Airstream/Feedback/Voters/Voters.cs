@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,13 +8,15 @@ namespace Airstream.Feedback.Voters
 {
     class Voter
     {
-        private List<Voter> listAllVoters = new List<Voter>();
+        private static List<Voter> listAllVoters = new List<Voter>();
 
         private long _id;
         private List<Answer> _givenAnswers;
+        private DateTime _dateTimeVote;
 
         public long id { get { return _id; } }
         public List<Answer> givenAnswers { get { return _givenAnswers; } }
+        public DateTime dateTimeVote { get { return _dateTimeVote; } }
 
         public Voter(long id)
         {
@@ -24,15 +26,21 @@ namespace Airstream.Feedback.Voters
             listAllVoters.Add(this);
         }
 
-        public List<Voter> GetAllVoters()
+        public static List<Voter> GetAllVoters()
         {
             return listAllVoters;
         }
 
+        public void SetDateTimeVote()
+        {
+            _dateTimeVote = DateTime.Now;
+        }
+
         public void AddGivenAnswer(Voter voter, Answer answer)
         {
-            Answer.SetDateTimeVote(answer);
+            SetDateTimeVote();
             voter._givenAnswers.Add(answer);
+            answer.AddCountVote();
         }
     }
 }

@@ -1,0 +1,32 @@
+{
+  "intents": [
+    {
+      "slots": [
+        {
+          "name": "SpecificNumber",
+          "type": "LIST_OF_NUMBERS"
+        },
+        {
+          "name": "Drink",
+          "type": "LIST_OF_DRINKS"
+        }
+      ],
+      "intent": "OrderIntent"
+    },
+    {
+      "intent": "MixedOrderIntent"
+    },
+    {
+      "intent": "AMAZON.StartOverIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    }
+  ]
+}

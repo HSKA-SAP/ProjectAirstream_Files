@@ -1,0 +1,21 @@
+OrderIntent und mache mir {SpecificNumber} {Drink}
+OrderIntent und mache mir {SpecificNumber} Tassen {Drink}
+OrderIntent dass ich {SpecificNumber} {Drink} möchte
+OrderIntent dass ich {SpecificNumber} Tassen {Drink} möchte
+OrderIntent dass ich {SpecificNumber} Tasse {Drink} möchte
+OrderIntent dass wir {SpecificNumber} Tassen {Drink} möchten
+OrderIntent nach {SpecificNumber} {Drink}
+MixedOrderIntent und mache mir einen Kaffee und eine Tasse heißes Wasser
+MixedOrderIntent und mache mir ein Kaffee und eine Tasse heißes Wasser
+MixedOrderIntent und mache mir einen Kaffee und ein heißes Wasser
+MixedOrderIntent und mache mir eine Tasse heißes Wasser und eine Tasse Kaffee
+MixedOrderIntent und mache mir ein heißes Wasser und eine Tasse Kaffee
+MixedOrderIntent und mache mir ein heißes Wasser und einen Kaffee
+MixedOrderIntent und mache mir ein heißes Wasser und ein Kaffee
+MixedOrderIntent und mache einen Kaffee und eine Tasse heißes Wasser
+MixedOrderIntent und mache ein Kaffee und eine Tasse heißes Wasser
+MixedOrderIntent und mache einen Kaffee und ein heißes Wasser
+MixedOrderIntent und mache eine Tasse heißes Wasser und eine Tasse Kaffee
+MixedOrderIntent und mache ein heißes Wasser und eine Tasse Kaffee
+MixedOrderIntent und mache ein heißes Wasser und einen Kaffee
+MixedOrderIntent und mache ein heißes Wasser und ein Kaffee
