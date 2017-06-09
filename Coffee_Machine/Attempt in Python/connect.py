@@ -1,8 +1,11 @@
 import time
+from commands import *
+
 import serial
+from api_definitions import *
 from telegramFormat import telegramFormat
-from commands import * 
-from api_definitions import * 
+
+
 # import GPIO
 # from construct import *
 # from threading import Timer
@@ -11,20 +14,21 @@ from api_definitions import *
 
 ## Important ##
 # - Make sure format of RPi is little endian - GOOD
-
+# - When ran on Pi -  use serial.Serial('/dev/ttyS0',115200, timeout=None)
 
 ## Define devices
 def MakeCoffee():
-	ports = InstantiatePorts()
+	port = InstantiatePort()
 	seqNumber = 0
-	WaitTillReady(ports,seqNumber,False)
+	#DoCoffee(port,seqNumber)
 
+	while True:
+		cmResponse = port.read_all()  # read from Pi
+		print("Read from Pi:", cmResponse)
 
-def InstantiatePorts():
-	raspberry = serial.Serial('COM1',115200,timeout=None)
-	coffee = serial.Serial('COM2',115200,timeout=None)
-	portsList = {'pi':raspberry,'cm':coffee} 
-	return portsList
+def InstantiatePort():
+	port = serial.Serial('COM1',115200,timeout=None)
+	return port
 ############# Execute as script ###############
 if __name__ == "__main__":
 	MakeCoffee()

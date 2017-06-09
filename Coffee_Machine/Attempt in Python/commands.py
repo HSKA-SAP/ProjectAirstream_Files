@@ -3,6 +3,7 @@ from telegramFormat import *
 from api_definitions import *
 import itertools
 import struct
+import io
 
 # GLOBALS
 MILK_OUTLET_DATA_SIZE = 3
@@ -20,7 +21,7 @@ def CreateTelegram(PIP_p, PIE_p, PN_p, SA_p, DA_p, MI_p, MP_p, DL_p, dataPackets
         SA_p,
         DA_p,
         MI_p,
-        MP_p & 0xff,  # depends on whether RPi is little-endian
+        MP_p & 0xff, 
         ((MP_p >> 8) & 0xff),
         DL_p & 0xff,
         ((DL_p >> 8) & 0xff),
@@ -40,6 +41,19 @@ def CreateTelegram(PIP_p, PIE_p, PN_p, SA_p, DA_p, MI_p, MP_p, DL_p, dataPackets
     print("Telegram Created:", finalTelegram)
     return bytes(finalTelegram)
 
+def CreateACK(PIP_p, PIE_p, PN_p, SA_p, DA_p):
+    array = [
+        PIP_p,
+        PIE_p,
+        PN_p,
+        SA_p,
+        DA_p,
+    ]
+    shifted = StuffAndShift(array)
+    finalTelegram = [DPT_SpecialChar_t.SOH_e.value] + \
+        shifted + [DPT_SpecialChar_t.EOT_e.value]
+    print("Telegram Created:", finalTelegram)
+    return bytes(finalTelegram)
 
 def StuffAndShift(arrayToShift):
     a = arrayToShift
@@ -92,22 +106,24 @@ def HighNibble(bitArray):
 
 ################################### SENDING PACKETS ######################
 
-def DoCommand(ports, seqNumber, telegram):
-    WaitTillACK(ports, seqNumber, telegram, False)
+def DoCommand(port, seqNumber, telegram):
+    WaitTillACK(port, seqNumber, telegram, False)
     return 0
 
-def DoCoffee():
+def DoCoffee(port, seqNumber):
+    WaitTillReady(port,seqNumber,False)
     return 0
 
 
-def GetMachineStatus(ports, seqNumber):
+def GetMachineStatus(port, seqNumber):
     telegram = GetStatus(seqNumber)
-    WaitTillACK(ports, seqNumber, telegram, False)
+    WaitTillACK(port, seqNumber, telegram, False)
     machineReady = False
 
     while(machineReady == False):
-        cmResponse = ports['pi'].read_all()  # Read from Raspberry Pi
-        cmResponse = CreateTelegram(0x00,0x68,0x02,0x41,0x42,0x01,0x00,0x0006,True,[0x01,0x01,0x01,0x01,0x00,0x00])
+        print(port.read_all())
+        cmResponse = readtilleol(port)  # Read from coffee machine
+        print(cmResponse)
         if(len(cmResponse) > 0):
               # decrypt the message - i.e. get the status
             telegram = ResponseToTelegramArray(cmResponse)
@@ -118,8 +134,8 @@ def GetMachineStatus(ports, seqNumber):
     # print (statuses[0]['Coffee Left Process']) # How to Access General status bits   
     return statuses
 
-def CheckIfReady(ports,seqNumber):
-    statuses = GetMachineStatus(ports, seqNumber)
+def CheckIfReady(port,seqNumber):
+    statuses = GetMachineStatus(port, seqNumber)
     length = len(statuses[0])
     print(len(statuses[0]))
     i = 2
@@ -129,9 +145,9 @@ def CheckIfReady(ports,seqNumber):
         i+=2
     return True
     
-def WaitTillReady(ports, seqNumber, ready):
+def WaitTillReady(port, seqNumber, ready):
     while(ready == False):
-        ready = CheckIfReady(ports,seqNumber)
+        ready = CheckIfReady(port,seqNumber)
         seqNumber +=1 
 
 
@@ -173,29 +189,31 @@ def GetStatusArrays(telegram):
 
 
 
-def WaitTillACK(ports, seqNumber, telegram, ACKReceived):
+def WaitTillACK(port, seqNumber, telegram, ACKReceived):
     while(ACKReceived == False):
-        ACKReceived = CheckForAck(ports, seqNumber, telegram)
+        ACKReceived = CheckForAck(port, seqNumber, telegram)
         time.sleep(0.8) # might be problem
 
 
-def CheckForAck(ports, seqNumber, telegram):
+def CheckForAck(port, seqNumber, telegram):
     # Send Command/Request
-    ports['cm'].write(telegram)  # send command to coffee machine
+    port.write(bytes(telegram))  # send command to coffee machine
     time.sleep(0.15)
     # Read response
-    cmResponse = ports['pi'].read_all()  # read from Pi
+    cmResponse = port.read_all()  # read from Pi
     print("Read from Pi:", cmResponse)
 
     ##Convert response to telegram array
     telegram = ResponseToTelegramArray(cmResponse)
-    print("PIE:", hex(telegram[2]))
-    if(telegram[2] == PacketTypes.ACK.value):
-        print("ACK Packet Detected")
-        return True
+    if(len(telegram) > 0 ):
+        print("PIE:", hex(telegram[2]))
+        if(telegram[2] == PacketTypes.ACK.value):
+            print("ACK Packet Detected")
+            return True
     else:
         print("Received no ACK packet from coffee machine...sending packet again")
         return False
+    port.reset_input_buffer()
 
 def ResponseToTelegramArray(response):
     telegram = TelegramToIntArray(response)
@@ -209,7 +227,23 @@ def TelegramToIntArray(telegram):
     return list(itertools.chain.from_iterable(array))
 
 
+def readtilleol(port):
+    eol = b'\x04'
+    leneol = len(eol)
+    line = bytearray()
+    while True:
+        c = port.read(1)
+        if c:
+            line += c
+            if line[-leneol:] == eol:
+                break
+        else:
+            break
+    return bytes(line)
+
 ################################### SENDING TELEGRAMS ####################
+
+############################# COMMANDS ###############################
 def DoRinse(MI, MP, DL, seqNum):
     telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42,
                               0x41, MI, MP, DL, False, [0])
@@ -230,13 +264,6 @@ def StartClean(seqNum):
     telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41,
                               API_Command_t.StartCleaning_e.value, 0, 0, False, [0])
     return telegram
-
-
-def GetRequest(seqNum):
-    telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41,
-                              API_Command_t.GetRequests_e.value, 0, 0, False, [0])
-    return telegram
-
 
 def StopProcess(module, seqNum):
     telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41,
@@ -308,22 +335,33 @@ def DoLeftScreenRinse(seqNum):
     telegram = DoScreenRinse(LEFT_SIDE, seqNum)
     return telegram
 
+################################## REQUESTS ######################################
+
+def GetStatus(seqNum):
+    telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
+                              API_Command_t.GetStatus_e.value, 0, 0, False, [0])
+    return telegram
+
+def GetRequest(seqNum):
+    telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
+                              API_Command_t.GetRequests_e.value, 0, 0, False, [0])
+    return telegram
 
 def GetInfoMessage(seqNum):
     array = [0] * 3
-    telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
                               API_Command_t.GetInfoMessages_e.value, 0, 3, True, array)
     return telegram
 
 
 def DisplayAction(action, seqNum):
-    telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
                               API_Command_t.DisplayAction_e.value, action, 0, False, [0])
     return telegram
 
 
 def GetProductDump(side, seqNum):
-    telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
                               API_Command_t.GetProductDump_e.value, side, 0, False, [0])
     return telegram
 
@@ -339,14 +377,8 @@ def GetProductDumpLeft(seqNum):
 
 
 def GetSensorValues(seqNum):
-    telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41,
-                              API_Command_t.GetSensorValues_e.value, 0, 0, False, [0])
-    return telegram
-
-
-def GetStatus(seqNum):
     telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
-                              API_Command_t.GetStatus_e.value, 0, 0, False, [0])
+                              API_Command_t.GetSensorValues_e.value, 0, 0, False, [0])
     return telegram
 
 

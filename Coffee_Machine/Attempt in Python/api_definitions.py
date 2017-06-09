@@ -17,7 +17,7 @@ class DPT_SpecialChar_t(Enum):
 ## API commands
 class API_Command_t(Enum):
 	Reserved_e = 0
-	GetStatus_e = 1
+	GetStatus_e = 1 
 	DoProduct_e = 2
 	DoRinse_e = 3
 	StartCleaning_e = 4
