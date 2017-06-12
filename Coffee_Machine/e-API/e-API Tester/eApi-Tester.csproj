@@ -1,0 +1,260 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D01155B1-FFC3-4623-9B74-7E87435AF24B}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>eApi</RootNamespace>
+    <AssemblyName>eApi Tester</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <StartupObject>
+    </StartupObject>
+    <ApplicationIcon>eApi.ico</ApplicationIcon>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;Briggo</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\..\5_Deployment\Win-Exe\</OutputPath>
+    <DefineConstants>TRACE;Briggo</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release with analyzer|AnyCPU' ">
+    <OutputPath>C:\Users\Philippe\Desktop\</OutputPath>
+    <DefineConstants>Analyzer</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release as Library|AnyCPU' ">
+    <OutputPath>C:\Users\Philippe\Desktop\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Analyzer\AnalyzerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Analyzer\AnalyzerForm.Designer.cs">
+      <DependentUpon>AnalyzerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Analyzer\Hub\ComportHub.cs" />
+    <Compile Include="Analyzer\SerialPacketField.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Analyzer\SerialPacketField.Designer.cs">
+      <DependentUpon>SerialPacketField.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Analyzer\SerialRawPacketField.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Analyzer\SerialRawPacketField.Designer.cs">
+      <DependentUpon>SerialRawPacketField.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ApiSerialComm.cs" />
+    <Compile Include="Commands\CmdButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Commands\DoProduct\DoProduct.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Commands\DoProduct\DoProductCommand.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Commands\DoProduct\DoProductCommand.Designer.cs">
+      <DependentUpon>DoProductCommand.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Commands\GetProductDump\GetProductDump.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Commands\GetProductDump\GetProductDumpResponse.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Commands\GetProductDump\GetProductDumpResponse.designer.cs">
+      <DependentUpon>GetProductDumpResponse.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Commands\GetStatus\GetStatus.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Commands\GetStatus\GetStatusResponse.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Commands\GetStatus\GetStatusResponse.Designer.cs">
+      <DependentUpon>GetStatusResponse.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Commands\plainCommand\plainCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="filesystem.cs" />
+    <Compile Include="FilterForm\FilterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FilterForm\FilterForm.Designer.cs">
+      <DependentUpon>FilterForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm\MainForm.Commands.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm\MainForm.SerialComm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Commands\DoProduct\DoProductCommand.resx">
+      <DependentUpon>DoProductCommand.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Commands\GetStatus\GetStatusResponse.resx">
+      <DependentUpon>GetStatusResponse.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FilterForm\FilterForm.resx">
+      <DependentUpon>FilterForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SerialportForm\SerialportForm.resx">
+      <DependentUpon>SerialportForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="SerialportForm\SerialportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SerialportForm\SerialportForm.designer.cs">
+      <DependentUpon>SerialportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Typedefs.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\arrow_left_green.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\arrow_left_grey.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\arrow_left_red.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\arrow_left_transparent.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\eAPI.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\eAPI_small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\expand.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\filter.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\sort_az.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pictures\sort_za.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.manifest" />
+    <None Include="Resources\pictures\eAPI_Analyzer.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Analyzer\AnalyzerForm.resx">
+      <DependentUpon>AnalyzerForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Analyzer\SerialPacketField.resx">
+      <DependentUpon>SerialPacketField.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Analyzer\SerialRawPacketField.resx">
+      <DependentUpon>SerialRawPacketField.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Commands\GetProductDump\GetProductDumpResponse.resx">
+      <DependentUpon>GetProductDumpResponse.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="eApi.ico" />
+    <None Include="Resources\pictures\update.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

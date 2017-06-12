@@ -20,14 +20,15 @@ from telegramFormat import telegramFormat
 def MakeCoffee():
 	port = InstantiatePort()
 	seqNumber = 0
-	#DoCoffee(port,seqNumber)
-
-	while True:
-		cmResponse = port.read_all()  # read from Pi
-		print("Read from Pi:", cmResponse)
+	# Check for ACK, Get Status, Check if all statuses are okay
+	WaitTillReady(port,seqNumber,False)
+    # telegram = DoRinseRight(seqNumber)
+    # DoCommand(port,seqNumber,telegram)
+	telegram = DoCoffeeLeft(seqNumber)
+	DoCommand(port,seqNumber,telegram)
 
 def InstantiatePort():
-	port = serial.Serial('COM1',115200,timeout=None)
+	port = serial.Serial('COM6',115200,timeout=None)
 	return port
 ############# Execute as script ###############
 if __name__ == "__main__":

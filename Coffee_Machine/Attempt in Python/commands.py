@@ -38,7 +38,7 @@ def CreateTelegram(PIP_p, PIE_p, PN_p, SA_p, DA_p, MI_p, MP_p, DL_p, dataPackets
     shifted = StuffAndShift(array)
     finalTelegram = [DPT_SpecialChar_t.SOH_e.value] + \
         shifted + [DPT_SpecialChar_t.EOT_e.value]
-    print("Telegram Created:", finalTelegram)
+    #print("Telegram Created:", finalTelegram)
     return bytes(finalTelegram)
 
 def CreateACK(PIP_p, PIE_p, PN_p, SA_p, DA_p):
@@ -52,7 +52,7 @@ def CreateACK(PIP_p, PIE_p, PN_p, SA_p, DA_p):
     shifted = StuffAndShift(array)
     finalTelegram = [DPT_SpecialChar_t.SOH_e.value] + \
         shifted + [DPT_SpecialChar_t.EOT_e.value]
-    print("Telegram Created:", finalTelegram)
+    #print("Telegram Created:", finalTelegram)
     return bytes(finalTelegram)
 
 def StuffAndShift(arrayToShift):
@@ -106,44 +106,50 @@ def HighNibble(bitArray):
 
 ################################### SENDING PACKETS ######################
 
-def DoCommand(port, seqNumber, telegram):
-    WaitTillACK(port, seqNumber, telegram, False)
+
+
+def DoCommand(port,seqNumber,telegram):
+    WaitTillACK(port,seqNumber,telegram,False)
+    ClearPortContents(port)
+    port.write(bytes(telegram))
     return 0
 
-def DoCoffee(port, seqNumber):
-    WaitTillReady(port,seqNumber,False)
-    return 0
-
+def ClearPortContents(port):
+    port.reset_input_buffer()
+    port.reset_output_buffer()
 
 def GetMachineStatus(port, seqNumber):
     telegram = GetStatus(seqNumber)
     WaitTillACK(port, seqNumber, telegram, False)
-    machineReady = False
-
-    while(machineReady == False):
-        print(port.read_all())
-        cmResponse = readtilleol(port)  # Read from coffee machine
-        print(cmResponse)
-        if(len(cmResponse) > 0):
+    # After acknowledging packet, send the instruction again to get a response
+    seqNumber += 1
+    telegram = GetStatus(seqNumber)
+    port.write(bytes(telegram))
+    time.sleep(0.15)
+    response = port.read_all()
+    responseData = ResponseToTelegramArray(response)[7:]
+    print(responseData)
+    machineStatusReceived = False
+    while(machineStatusReceived == False):
+        if(len(responseData) > 0):
               # decrypt the message - i.e. get the status
-            telegram = ResponseToTelegramArray(cmResponse)
-            if (telegram[2] == PacketTypes.RESPONSE.value):
-                statuses = GetStatusArrays(telegram)
-                machineReady = True
+            if (responseData[2] == PacketTypes.RESPONSE.value):
+                statuses = GetStatusArrays(responseData)
+                return statuses
     # print (statuses[1]['Just Reset']) # How to Access Machine status bits
     # print (statuses[0]['Coffee Left Process']) # How to Access General status bits   
-    return statuses
+    return 0 #temporary
 
 def CheckIfReady(port,seqNumber):
-    statuses = GetMachineStatus(port, seqNumber)
-    length = len(statuses[0])
-    print(len(statuses[0]))
-    i = 2
-    while(i < 11): ## 11 = 
-        if(i == 0):
-            return False
-        i+=2
-    return True
+    statuses = GetMachineStatus(port, seqNumber)[0]
+    del statuses['Machine Status']
+    print(statuses)
+
+    statusCodes = list(val for key,val in statuses.items() if 'status' in key.lower())
+    if all([ v == 0 for v in statusCodes ]) :
+        print ("The coffee machine is ready")
+    else:
+        print("Please check the coffee machine for errors")
     
 def WaitTillReady(port, seqNumber, ready):
     while(ready == False):
@@ -152,7 +158,7 @@ def WaitTillReady(port, seqNumber, ready):
 
 
 def GetStatusArrays(telegram):
-    startOfDataBits = 9 # SOH = 0, PIP = 1, PIE = 2 ... DL = 8
+    startOfDataBits = 11 # SOH = 0, PIP = 1, PIE = 2 ... DL = (9+10) - 16 bit
     dataBits = {'Machine Status' : telegram[startOfDataBits], \
     'Coffee Left Action': HighNibble(telegram[startOfDataBits + 1]), \
     'Coffee Left Status': LowNibble(telegram[startOfDataBits + 1]), \
@@ -169,11 +175,11 @@ def GetStatusArrays(telegram):
     'Water Action':  HighNibble(telegram[startOfDataBits + 5]), \
     'Water Status':  LowNibble(telegram[startOfDataBits + 5]), \
 
-    'Coffee Left Process':  HighNibble(telegram[startOfDataBits + 6]), \
-    'Coffee Right Process':  HighNibble(telegram[startOfDataBits + 7]), \
-    'Steam Left Process':  HighNibble(telegram[startOfDataBits + 8]), \
-    'Steam Right Process':  HighNibble(telegram[startOfDataBits + 9]), \
-    'Water Process':  HighNibble(telegram[startOfDataBits + 10]), \
+    'Coffee Left Process':  telegram[startOfDataBits + 6], \
+    'Coffee Right Process':  telegram[startOfDataBits + 7], \
+    'Steam Left Process':  telegram[startOfDataBits + 8], \
+    'Steam Right Process':  telegram[startOfDataBits + 9], \
+    'Water Process':  telegram[startOfDataBits + 10], \
     }
 
     ## Might need to flip if big-endian architecture
@@ -183,7 +189,7 @@ def GetStatusArrays(telegram):
     'Request Set': machineStatus[1], \
     'Info Message Set': machineStatus[2], \
     'Product Dump Left':  machineStatus[4], \
-    'Product Dump Left':  machineStatus[5], \
+    'Product Dump Right':  machineStatus[5], \
     }
     return [dataBits, machineStatusData]
 
@@ -192,13 +198,16 @@ def GetStatusArrays(telegram):
 def WaitTillACK(port, seqNumber, telegram, ACKReceived):
     while(ACKReceived == False):
         ACKReceived = CheckForAck(port, seqNumber, telegram)
+        if(ACKReceived):
+            break
         time.sleep(0.8) # might be problem
+        seqNumber+=1
 
 
 def CheckForAck(port, seqNumber, telegram):
     # Send Command/Request
     port.write(bytes(telegram))  # send command to coffee machine
-    time.sleep(0.15)
+    time.sleep(0.1)
     # Read response
     cmResponse = port.read_all()  # read from Pi
     print("Read from Pi:", cmResponse)
@@ -213,7 +222,6 @@ def CheckForAck(port, seqNumber, telegram):
     else:
         print("Received no ACK packet from coffee machine...sending packet again")
         return False
-    port.reset_input_buffer()
 
 def ResponseToTelegramArray(response):
     telegram = TelegramToIntArray(response)
@@ -243,7 +251,53 @@ def readtilleol(port):
 
 ################################### SENDING TELEGRAMS ####################
 
-############################# COMMANDS ###############################
+############################# COMMANDS ###################################
+
+def DoProduct(side,dataDict,seqNum):
+
+    data = [dataDict["Product Type: "],dataDict["Product Process: "],dataDict["Water Quantity: "] & 0xff, \
+            ((dataDict["Water Quantity: "] >> 8) & 0xff),dataDict["Bean Hopper: "], \
+             dataDict["Cake Thickness: "] & 0xff, ((dataDict["Cake Thickness: "] >> 8) & 0xff), \
+             dataDict["Tamping: "], dataDict["Pre-Infusion: "],dataDict["Relax Time: "], dataDict["Second Tamping: "], \
+             dataDict["Milk Qty: "] & 0xff, ((dataDict["Milk Qty: "] >> 8) & 0xff), \
+             dataDict["Milk Temperature: "], dataDict["Milk Percent: "], dataDict["Milk Seq: "], dataDict["Latte Macchiato Time: "], \
+             dataDict["Foam Sequence: "], \
+             dataDict["Steam Time: "] & 0xff, ((dataDict["Steam Time: "] >> 8) & 0xff), \
+             dataDict["Steam Temperature: "], dataDict["Everfoam Mode: "], dataDict["Air Stop Temperature: "], \
+             dataDict["Air Stop Time: "] & 0xff, ((dataDict["Air Stop Time: "] >> 8) & 0xff), \
+             dataDict["Pump Speed Milk: "] & 0xff, ((dataDict["Pump Speed Milk: "] >> 8) & 0xff), \
+             dataDict["Pump Speed Foam: "] & 0xff, ((dataDict["Pump Speed Foam: "] >> 8) & 0xff), \
+             dataDict["param 23: "], \
+             dataDict["Milk/Coffee Delay: "] & 0xff, ((dataDict["Milk/Coffee Delay: "] >> 8) & 0xff)]
+    
+    #print(len(data))
+    
+    telegram =  CreateTelegram(0x00,PacketTypes.COMMAND.value,seqNum,0x42,0x41,0x02,side,len(data),True,data)
+    #print([hex(x) for x in TelegramToIntArray(telegram)])
+    #print(len(TelegramToIntArray(telegram)))
+    
+    return telegram
+
+def DoCoffee(side,seqNum):
+    dataDict = {"Product Type: ":ProductType_t.Coffee_e.value, "Product Process: ":0, \
+            "Water Quantity: ":135 , "Bean Hopper: ":1, "Cake Thickness: ":140, \
+            "Tamping: ":64, "Pre-Infusion: ": 0, "Relax Time: ": 0, "Second Tamping: ":0, \
+            "Milk Qty: ":10, "Milk Temperature: ":255,"Milk Percent: ":1,"Milk Seq: ":MilkSequence_t.MilkSeqUndef_e.value,\
+            "Latte Macchiato Time: ":1, "Foam Sequence: ":0, "Steam Time: ":1,\
+            "Steam Temperature: ":30, "Everfoam Mode: ":0, "Air Stop Temperature: ":0, "Air Stop Time: ":10, \
+            "Pump Speed Milk: ":1500, "Pump Speed Foam: ":3000, "param 23: ":0, "Milk/Coffee Delay: ":5}
+    telegram = DoProduct(side,dataDict,seqNum)
+    return telegram
+
+def DoCoffeeLeft(seqNum):
+    telegram = DoCoffee(LEFT_SIDE,seqNum)
+    return telegram
+
+def DoCoffeeRight(seqNum):
+    telegram = DoCoffee(RIGHT_SIDE,seqNum)
+    return telegram
+
+
 def DoRinse(MI, MP, DL, seqNum):
     telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42,
                               0x41, MI, MP, DL, False, [0])
