@@ -61,8 +61,6 @@ namespace Airstream
         private int _localOptionClick = 0;
         private int _feedbackID = 0;
         private string projectFolder = "..\\..\\..\\";
-        PictureBox _backBtnFeedback;
-        PictureBox _fwdBtnFeedback;
         #endregion
 
         private Voter _currentVoter;
@@ -188,28 +186,6 @@ namespace Airstream
 
             Controls.Add(_labelBarGraphOption5);
 
-            _backBtnFeedback = new PictureBox();
-            _backBtnFeedback.BackColor = Color.Transparent;
-            _backBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\back_disabled.png");
-            _backBtnFeedback.BackgroundImageLayout = ImageLayout.Stretch;
-            _backBtnFeedback.Size = new Size(100, 100);
-            _backBtnFeedback.Location = new Point(0, Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.165));
-            _backBtnFeedback.Click += backBtn_Click;
-            _backBtnFeedback.Enabled = false;
-
-            _fwdBtnFeedback = new PictureBox();
-            _fwdBtnFeedback.BackColor = Color.Transparent;
-            _fwdBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\forward_disabled.png");
-            _fwdBtnFeedback.Enabled = false;
-            _fwdBtnFeedback.BackgroundImageLayout = ImageLayout.Stretch;
-            _fwdBtnFeedback.Size = new Size(100, 100);
-            _fwdBtnFeedback.Location = new Point(Convert.ToInt32(UI_General.GetSizeScreen().Width * 0.91), Convert.ToInt32(UI_General.GetSizeScreen().Height * 0.165));
-            _fwdBtnFeedback.Click += fwdBtn_Click;
-            _fwdBtnFeedback.Visible = true;
-            _backBtnFeedback.Visible = true;
-
-            Controls.Add(_backBtnFeedback);
-            Controls.Add(_fwdBtnFeedback);
 
             // Feedback Question element
             _labelFeedbackQuestion = new Label();
@@ -348,8 +324,6 @@ namespace Airstream
         /// </summary>
         public void DisplayQuestion()
         {
-            _fwdBtnFeedback.Enabled = false;
-            _fwdBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\forward_disabled.png");
 
             #region loop through questions
             if (_currentQuestion < _questions.Count && _currentQuestion >= 0)
@@ -373,11 +347,21 @@ namespace Airstream
                     _buttonOption4.Text = _questions[_currentQuestion].options[4].text;
                     _buttonOption4.BackgroundImage = new Bitmap(projectFolder + @"Pictures\Compressed\digitalboardroomlogodone.jpg");
                     _buttonOption4.BackgroundImageLayout = ImageLayout.Stretch;
-                    _backBtnFeedback.Enabled = false;
-                    _backBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\back_disabled.png");
                 }
-                else //If it is not the first question, display the default question and answer layout
+                //yes or no questions
+                else if(_currentQuestion == 2 || _currentQuestion == 3 || _currentQuestion == 5)
                 {
+                    _buttonOption0.Visible = false;
+                    _buttonOption2.Visible = false;
+                    _buttonOption4.Visible = false;
+                    _buttonOption1.Text = _questions[_currentQuestion].options[0].text;
+                    _buttonOption3.Text = _questions[_currentQuestion].options[1].text;
+
+
+                }
+                else //If it is not the first question or a yes or no question, display the default question and answer layout
+                {
+                    _buttonOption0.Visible = _buttonOption1.Visible = _buttonOption2.Visible = _buttonOption3.Visible = _buttonOption4.Visible = true;
                     _buttonOption0.Text = _questions[_currentQuestion].options[0].text;
                     _buttonOption0.BackgroundImage = null;
                     _buttonOption1.Text = _questions[_currentQuestion].options[1].text;
@@ -388,14 +372,8 @@ namespace Airstream
                     _buttonOption3.BackgroundImage = null;
                     _buttonOption4.Text = _questions[_currentQuestion].options[4].text;
                     _buttonOption4.BackgroundImage = null;
-                    _backBtnFeedback.Enabled = true;
-                    _backBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\back.png");
 
-                    if (_currentQuestion == _questions.Count - 1)
-                    {
-                        _fwdBtnFeedback.Enabled = false;
-                        _fwdBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\forward_disabled.png");
-                    }
+
                 }
             }
             else if(_currentQuestion < 0)
@@ -593,21 +571,7 @@ namespace Airstream
             _currentVoter.AddGivenAnswer(answer);
             Debug.Print(_buttonOption0.ContainsFocus.ToString());
             List<Button> unFocusedBtns = new List<Button>();
-            if(_localOptionClick == 1)
-            {
-                HighlightFocusedBtn(clickedButton);
-                _fwdBtnFeedback.Enabled = true;
-                _fwdBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\forward.png");
-
-            }
-            if (_localOptionClick == 2)
-            {
-                UnHighlightFocusedBtn(clickedButton);
-                _localOptionClick = 0;
-                _fwdBtnFeedback.Enabled = false;
-                _fwdBtnFeedback.BackgroundImage = new Bitmap(projectFolder + @"Pictures\forward_disabled.png");
-
-            }
+            NextQuestion();
 
         }
 
@@ -650,30 +614,6 @@ namespace Airstream
             _pictureBoxFeedbackFavorites.Visible = true;
         }
 
-        /// <summary>
-        ///  An event handler for clicking on the forward button that is present during feedback
-        /// </summary>
-        private void fwdBtn_Click(object sender, EventArgs e)
-        {
-            if(_buttonOption0.ContainsFocus == true || _buttonOption1.ContainsFocus == true || _buttonOption2.ContainsFocus == true || _buttonOption3.ContainsFocus == true || _buttonOption4.ContainsFocus == true)
-            {
-                NextQuestion();
-            }
-            else
-            {
-
-            }
-
-        }
-
-        /// <summary>
-        ///  An event handler for clicking on the back button that is present during feedback
-        /// </summary>
-        private void backBtn_Click(object sender, EventArgs e)
-        {
-            PrevQuestion();
-            this.ActiveControl = null;
-        }
 
         private void LeaveOption(object sender, EventArgs e)
         {

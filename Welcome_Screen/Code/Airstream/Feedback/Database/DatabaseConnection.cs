@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace Airstream.Feedback.Database
 {
-    class DatabaseConnection
+    public class DatabaseConnection
     {
         private MySqlConnection connection;
         private string server;
@@ -60,7 +60,7 @@ namespace Airstream.Feedback.Database
         }
 
         //Close connection
-        private bool CloseConnection()
+        public  bool CloseConnection()
         {
             try
             {

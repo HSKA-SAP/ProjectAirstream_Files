@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eApi-Tester", "e-API Tester\eApi-Tester.csproj", "{D01155B1-FFC3-4623-9B74-7E87435AF24B}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "eAPI-Tester Setup", "eAPI-Tester Setup\eAPI-Tester Setup.vdproj", "{CAFB580A-27CA-41FB-8997-71EDE4DBB3DD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release with analyzer|Any CPU = Release with analyzer|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D01155B1-FFC3-4623-9B74-7E87435AF24B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D01155B1-FFC3-4623-9B74-7E87435AF24B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D01155B1-FFC3-4623-9B74-7E87435AF24B}.Release with analyzer|Any CPU.ActiveCfg = Release with analyzer|Any CPU
+		{D01155B1-FFC3-4623-9B74-7E87435AF24B}.Release with analyzer|Any CPU.Build.0 = Release with analyzer|Any CPU
+		{D01155B1-FFC3-4623-9B74-7E87435AF24B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D01155B1-FFC3-4623-9B74-7E87435AF24B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAFB580A-27CA-41FB-8997-71EDE4DBB3DD}.Debug|Any CPU.ActiveCfg = Debug
+		{CAFB580A-27CA-41FB-8997-71EDE4DBB3DD}.Release with analyzer|Any CPU.ActiveCfg = Release
+		{CAFB580A-27CA-41FB-8997-71EDE4DBB3DD}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
