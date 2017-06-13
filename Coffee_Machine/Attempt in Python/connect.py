@@ -1,31 +1,31 @@
-import time
-from commands import *
-
+import commands
 import serial
-from api_definitions import *
-from telegramFormat import telegramFormat
-
-
-# import GPIO
-# from construct import *
-# from threading import Timer
-# import array
-# import struct 
 
 ## Important ##
-# - Make sure format of RPi is little endian - GOOD
-# - When ran on Pi -  use serial.Serial('/dev/ttyS0',115200, timeout=None)
+# - Make sure format of RPi is little endian 
+# - When run on Pi -  use serial.Serial('/dev/ttyS0',115200, timeout=None)
 
-## Define devices
 def MakeCoffee():
-	port = InstantiatePort()
+	while True:
+		try:
+			port = InstantiatePort()
+			break
+		except serial.serialutil.SerialException:
+			input("Serial port is already in use.. please close the port and press <Enter> to try again")
 	seqNumber = 0
 	# Check for ACK, Get Status, Check if all statuses are okay
-	WaitTillReady(port,seqNumber,False)
-    # telegram = DoRinseRight(seqNumber)
-    # DoCommand(port,seqNumber,telegram)
-	telegram = DoCoffeeLeft(seqNumber)
-	DoCommand(port,seqNumber,telegram)
+	print("[STATUS] Start script")
+	print("\n[STATUS]Checking coffee machine status...")
+	commands.WaitTillReady(port,seqNumber)
+	# telegram = DoRinseRight(seqNumber)
+	# DoCommand(port,seqNumber,telegram)#
+	telegram = commands.DoCoffeeLeft(seqNumber)
+	commands.DoCommand(port,seqNumber,telegram)
+	close(port)
+
+def close(port):
+	port.close()
+	input("script executed successfully, press any key to exit...")
 
 def InstantiatePort():
 	port = serial.Serial('COM6',115200,timeout=None)

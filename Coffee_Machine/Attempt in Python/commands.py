@@ -5,14 +5,14 @@ import itertools
 import struct
 import io
 
-# GLOBALS
+# GLOBAL VARIABLES
 MILK_OUTLET_DATA_SIZE = 3
 MILK_TUBE_LENGTH = 350
 SCREEN_RINSE_DATA_SIZE = 2
 RIGHT_SIDE = 1
 LEFT_SIDE = 0
 
-
+############################################# START OF CREATING AND READING TELEGRAMS ##########################
 def CreateTelegram(PIP_p, PIE_p, PN_p, SA_p, DA_p, MI_p, MP_p, DL_p, dataPackets_p, data_p):
     array = [
         PIP_p,
@@ -38,10 +38,11 @@ def CreateTelegram(PIP_p, PIE_p, PN_p, SA_p, DA_p, MI_p, MP_p, DL_p, dataPackets
     shifted = StuffAndShift(array)
     finalTelegram = [DPT_SpecialChar_t.SOH_e.value] + \
         shifted + [DPT_SpecialChar_t.EOT_e.value]
-    #print("Telegram Created:", finalTelegram)
+    
+    print("\n Sent from Pi: " + str(bytes(finalTelegram)))
     return bytes(finalTelegram)
 
-def CreateACK(PIP_p, PIE_p, PN_p, SA_p, DA_p):
+def CreateACKPacket(PIP_p, PIE_p, PN_p, SA_p, DA_p):
     array = [
         PIP_p,
         PIE_p,
@@ -101,60 +102,85 @@ def HighNibble(bitArray):
     return bitArray >> 4
 
 
-##########################################  COMMANDS #####################
+############################################# END OF CREATING AND READING TELEGRAMS ###########################
 
-
-################################### SENDING PACKETS ######################
-
+############################################# START OF SENDING PACKETS  #######################################
 
 
 def DoCommand(port,seqNumber,telegram):
-    WaitTillACK(port,seqNumber,telegram,False)
+    WaitTillACK(port,seqNumber,telegram)
     ClearPortContents(port)
     port.write(bytes(telegram))
     return 0
+
+def DoRequest(port,seqNumber, telegram):
+    
+    machineStatusReceived = False
+    responseData = 0
+    while machineStatusReceived == False:
+        port.write(bytes(telegram))
+        time.sleep(0.15)
+        response = port.read_all()
+        responseData = ResponseToTelegramArray(response)[7:]
+        if(len(responseData) > 0):
+            # decode the message to see if it is indeed a response
+            if (responseData[2] == PacketTypes.RESPONSE.value):
+                machineStatusReceived = True
+                print("\n[STATUS]Response successfully received:")
+                print("\n Response received from coffee machine: " + str(response))
+        else:
+            return 0
+            # Do something
+    return responseData
+
+def InitRequest(port,seqNumber,telegram):
+    WaitTillACK(port, seqNumber, telegram)
+    ClearPortContents(port)
 
 def ClearPortContents(port):
     port.reset_input_buffer()
     port.reset_output_buffer()
 
 def GetMachineStatus(port, seqNumber):
+    # Get the request telegram
+    print("\n\n Sending a request to get the machine status...")
     telegram = GetStatus(seqNumber)
-    WaitTillACK(port, seqNumber, telegram, False)
-    # After acknowledging packet, send the instruction again to get a response
+
+    # Get an ACK packet so the coffee machine is ready to send a response
+    InitRequest(port,seqNumber,telegram)
+    print("\n[STATUS]Resending the request to receive response...")
+    # Change the sequence number for the new packet
     seqNumber += 1
     telegram = GetStatus(seqNumber)
-    port.write(bytes(telegram))
-    time.sleep(0.15)
-    response = port.read_all()
-    responseData = ResponseToTelegramArray(response)[7:]
-    print(responseData)
-    machineStatusReceived = False
-    while(machineStatusReceived == False):
-        if(len(responseData) > 0):
-              # decrypt the message - i.e. get the status
-            if (responseData[2] == PacketTypes.RESPONSE.value):
-                statuses = GetStatusArrays(responseData)
-                return statuses
-    # print (statuses[1]['Just Reset']) # How to Access Machine status bits
-    # print (statuses[0]['Coffee Left Process']) # How to Access General status bits   
-    return 0 #temporary
+    # Get the response data 
+    responseData = DoRequest(port,seqNumber,telegram)  
+    return GetStatusArrays(responseData)
+
 
 def CheckIfReady(port,seqNumber):
     statuses = GetMachineStatus(port, seqNumber)[0]
+    print("\n[STATUS]Reading machine status...")
+    # print (statuses[1]['Just Reset']) # How to Access Machine status bits
+    # print (statuses[0]['Coffee Left Process']) # How to Access General status bits 
     del statuses['Machine Status']
-    print(statuses)
-
     statusCodes = list(val for key,val in statuses.items() if 'status' in key.lower())
     if all([ v == 0 for v in statusCodes ]) :
-        print ("The coffee machine is ready")
+        print("\n[STATUS]Success")
+        print ("\n The coffee machine is ready")
+        return True
     else:
-        print("Please check the coffee machine for errors")
+        print("\n[STATUS]Something is wrong")
+        input("\n Please check the coffee machine for errors and press any key to try again..")
+        return False
     
-def WaitTillReady(port, seqNumber, ready):
+def WaitTillReady(port, seqNumber):
+    ready = False
+    readyCnt = 1
     while(ready == False):
+        print("\n\n\n[STATUS] ATTEMPT" + str(readyCnt))
         ready = CheckIfReady(port,seqNumber)
         seqNumber +=1 
+        readyCnt +=1
 
 
 def GetStatusArrays(telegram):
@@ -195,7 +221,8 @@ def GetStatusArrays(telegram):
 
 
 
-def WaitTillACK(port, seqNumber, telegram, ACKReceived):
+def WaitTillACK(port, seqNumber, telegram):
+    ACKReceived = False
     while(ACKReceived == False):
         ACKReceived = CheckForAck(port, seqNumber, telegram)
         if(ACKReceived):
@@ -210,17 +237,16 @@ def CheckForAck(port, seqNumber, telegram):
     time.sleep(0.1)
     # Read response
     cmResponse = port.read_all()  # read from Pi
-    print("Read from Pi:", cmResponse)
 
     ##Convert response to telegram array
     telegram = ResponseToTelegramArray(cmResponse)
+    print("\n Received from coffee machine: " + str(cmResponse))
     if(len(telegram) > 0 ):
-        print("PIE:", hex(telegram[2]))
         if(telegram[2] == PacketTypes.ACK.value):
-            print("ACK Packet Detected")
+            print("\n[STATUS]Coffee machine sends ACK to command/request.. message received")
             return True
     else:
-        print("Received no ACK packet from coffee machine...sending packet again")
+        print("\n Received no ACK packet from coffee machine...sending packet again")
         return False
 
 def ResponseToTelegramArray(response):
@@ -249,10 +275,11 @@ def readtilleol(port):
             break
     return bytes(line)
 
-################################### SENDING TELEGRAMS ####################
 
-############################# COMMANDS ###################################
+############################################# END OF SENDING PACKETS  #########################################
 
+
+############################################# START OF PRODUCTS  ##############################################
 def DoProduct(side,dataDict,seqNum):
 
     data = [dataDict["Product Type: "],dataDict["Product Process: "],dataDict["Water Quantity: "] & 0xff, \
@@ -278,6 +305,7 @@ def DoProduct(side,dataDict,seqNum):
     
     return telegram
 
+# Product 1 Coffee
 def DoCoffee(side,seqNum):
     dataDict = {"Product Type: ":ProductType_t.Coffee_e.value, "Product Process: ":0, \
             "Water Quantity: ":135 , "Bean Hopper: ":1, "Cake Thickness: ":140, \
@@ -289,6 +317,8 @@ def DoCoffee(side,seqNum):
     telegram = DoProduct(side,dataDict,seqNum)
     return telegram
 
+
+
 def DoCoffeeLeft(seqNum):
     telegram = DoCoffee(LEFT_SIDE,seqNum)
     return telegram
@@ -298,8 +328,56 @@ def DoCoffeeRight(seqNum):
     return telegram
 
 
+# Product 2 Espresso
+def DoEspresso(side,seqNum):
+    
+    dataDict = {"Product Type: ":ProductType_t.Espresso_e.value, "Product Process: ":0, \
+            "Water Quantity: ":50 , "Bean Hopper: ":0, "Cake Thickness: ":140, \
+            "Tamping: ":64, "Pre-Infusion: ": 8, "Relax Time: ": 20, "Second Tamping: ":20, \
+            "Milk Qty: ":10, "Milk Temperature: ":255,"Milk Percent: ":1,"Milk Seq: ":MilkSequence_t.MilkSeqUndef_e.value,\
+            "Latte Macchiato Time: ":1, "Foam Sequence: ":0, "Steam Time: ":1,\
+            "Steam Temperature: ":30, "Everfoam Mode: ":0, "Air Stop Temperature: ":0, "Air Stop Time: ":10, \
+            "Pump Speed Milk: ":1500, "Pump Speed Foam: ":3000, "param 23: ":0, "Milk/Coffee Delay: ":5}
+    telegram = DoProduct(side,dataDict,seqNum)
+    return telegram
+
+def DoEspressoLeft(seqNum):
+    telegram = DoEspresso(LEFT_SIDE,seqNum)
+    return telegram
+
+def DoEspressoRight(seqNum):
+    telegram = DoEspresso(RIGHT_SIDE,seqNum)
+    return telegram
+
+# Product 3 Hot water
+
+def DoHotWater(side,seqNum):
+    
+    dataDict = {"Product Type: ":ProductType_t.HotWater_e.value, "Product Process: ":2, \
+            "Water Quantity: ":100 , "Bean Hopper: ":0, "Cake Thickness: ":140, \
+            "Tamping: ":64, "Pre-Infusion: ": 8, "Relax Time: ": 20, "Second Tamping: ":20, \
+            "Milk Qty: ":10, "Milk Temperature: ":255,"Milk Percent: ":1,"Milk Seq: ":MilkSequence_t.MilkSeqUndef_e.value,\
+            "Latte Macchiato Time: ":1, "Foam Sequence: ":0, "Steam Time: ":1,\
+            "Steam Temperature: ":30, "Everfoam Mode: ":0, "Air Stop Temperature: ":0, "Air Stop Time: ":10, \
+            "Pump Speed Milk: ":1500, "Pump Speed Foam: ":3000, "param 23: ":0, "Milk/Coffee Delay: ":5}
+    telegram = DoProduct(side,dataDict,seqNum)
+    return telegram
+
+def DoHotWaterLeft(seqNum):
+    telegram = DoHotWater(LEFT_SIDE,seqNum)
+    return telegram
+
+def DoHotWaterRight(seqNum):
+    telegram = DoHotWater(RIGHT_SIDE,seqNum)
+    return telegram
+
+
+############################################# END OF PRODUCTS  ################################################
+
+####################################### START OF COMMANDS #####################################################
+
 def DoRinse(MI, MP, DL, seqNum):
-    telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42,
+    telegram = CreateTelegram(0x00, PacketTypes.COMMAND.value, seqNum, 0x42,
                               0x41, MI, MP, DL, False, [0])
     return telegram
 
@@ -315,19 +393,19 @@ def DoRinseRight(seqNum):
 
 
 def StartClean(seqNum):
-    telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, PacketTypes.COMMAND.value, seqNum, 0x42, 0x41,
                               API_Command_t.StartCleaning_e.value, 0, 0, False, [0])
     return telegram
 
 def StopProcess(module, seqNum):
-    telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, PacketTypes.COMMAND.value, seqNum, 0x42, 0x41,
                               API_Command_t.Stop_e.value, module, 0x00, False, [0])
     return telegram
 
 
 def StopAllProcess(seqNum):
     telegram = CreateTelegram(
-        0x00, 0x68, seqNum, 0x42, 0x41, API_Command_t.Stop_e.value, 0, 0x00, False, [0])
+        0x00, PacketTypes.COMMAND.value, seqNum, 0x42, 0x41, API_Command_t.Stop_e.value, 0, 0x00, False, [0])
     return telegram
 
 
@@ -336,7 +414,7 @@ def RinseMilkOutlet(rinseMode,  side,  seqNum):
     array[0] = rinseMode
     array[1] = MILK_TUBE_LENGTH & 0xff
     array[2] = ((MILK_TUBE_LENGTH >> 8) & 0xff)
-    telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, PacketTypes.COMMAND.value, seqNum, 0x42, 0x41,
                               API_Command_t.MilkOutletRinse_e.value, side, MILK_OUTLET_DATA_SIZE, True, array)
     return telegram
 
@@ -375,7 +453,7 @@ def DoScreenRinse(side, seqNum):
     array[0] * SCREEN_RINSE_DATA_SIZE
     array[0] = 3  # screen rinse cycles
     array[1] = 10  # repetitions
-    telegram = CreateTelegram(0x00, 0x68, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, PacketTypes.COMMAND.value, seqNum, 0x42, 0x41,
                               API_Command_t.ScreenRinse_e.value, side, SCREEN_RINSE_DATA_SIZE, True, array)
     return telegram
 
@@ -389,33 +467,50 @@ def DoLeftScreenRinse(seqNum):
     telegram = DoScreenRinse(LEFT_SIDE, seqNum)
     return telegram
 
-################################## REQUESTS ######################################
+
+####################################### END OF COMMANDS #######################################################
+
+####################################### START OF REQUESTS #####################################################
 
 def GetStatus(seqNum):
-    telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, PacketTypes.REQUEST.value, seqNum, 0x42, 0x41,
                               API_Command_t.GetStatus_e.value, 0, 0, False, [0])
     return telegram
 
-def GetRequest(seqNum):
-    telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
+def GetRequest(seqNum,port):
+    telegram = CreateTelegram(0x00, PacketTypes.REQUEST.value, seqNum, 0x42, 0x41,
                               API_Command_t.GetRequests_e.value, 0, 0, False, [0])
-    return telegram
+
+    # Get the request telegram
+    print("\n\n Sending a request to get the set requests...")
+
+    # Get an ACK packet so the coffee machine is ready to send a response
+    InitRequest(port,seqNum,telegram)
+    print("\n[STATUS]Resending the request to receive response...")
+    # Change the sequence number for the new packet
+    seqNum += 1
+    telegram = CreateTelegram(0x00, PacketTypes.REQUEST.value, seqNum, 0x42, 0x41,
+                              API_Command_t.GetRequests_e.value, 0, 0, False, [0])
+    # Get the response data 
+    responseData = DoRequest(port,seqNum,telegram)  
+    
+    #print([hex(x) for x in responseData])
 
 def GetInfoMessage(seqNum):
     array = [0] * 3
-    telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, PacketTypes.REQUEST.value, seqNum, 0x42, 0x41,
                               API_Command_t.GetInfoMessages_e.value, 0, 3, True, array)
     return telegram
 
 
 def DisplayAction(action, seqNum):
-    telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, PacketTypes.REQUEST.value, seqNum, 0x42, 0x41,
                               API_Command_t.DisplayAction_e.value, action, 0, False, [0])
     return telegram
 
 
 def GetProductDump(side, seqNum):
-    telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, PacketTypes.REQUEST.value, seqNum, 0x42, 0x41,
                               API_Command_t.GetProductDump_e.value, side, 0, False, [0])
     return telegram
 
@@ -431,12 +526,13 @@ def GetProductDumpLeft(seqNum):
 
 
 def GetSensorValues(seqNum):
-    telegram = CreateTelegram(0x00, 0x6C, seqNum, 0x42, 0x41,
+    telegram = CreateTelegram(0x00, PacketTypes.REQUEST.value, seqNum, 0x42, 0x41,
                               API_Command_t.GetSensorValues_e.value, 0, 0, False, [0])
     return telegram
 
+####################################### ENF OF REQUESTS ######################################################
 
-##########################################  CRC CALCULATE ################
+####################################### START OF CRC CALC ####################################################
 crcPolynomTable = \
     [
         0x0000, 0xc0c1, 0xc181, 0x0140, 0xc301, 0x03c0, 0x0280, 0xc241,
@@ -486,3 +582,4 @@ def API_CalculateCRC(data_p, dataLength):
         nIndex += 1
 
     return checkSum
+####################################### END OF CRC CALC ######################################################
