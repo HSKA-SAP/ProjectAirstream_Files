@@ -18,7 +18,7 @@ logger.addHandler(handler)
 # - Make sure format of RPi is little endian 
 # - When run on Pi -  use serial.Serial('/dev/ttyS0',115200, timeout=None)
 
-def MakeCoffee():
+def MakeCoffee(moreThanOneProduct):
 	logger.disabled = True
 	port = OpenThePort()
 	seqNumber = 0
@@ -28,9 +28,29 @@ def MakeCoffee():
 	commands.WaitTillReady(port,seqNumber)
 	# telegram = DoRinseRight(seqNumber)
 	# DoCommand(port,seqNumber,telegram)#
-	# response = commands.GetInfoMessage(seqNumber,port)
-	# print([hex(x)  for x in response])
-	# print("\n" + str(response))
+	#print(commands.GetProductDumpLeft(seqNumber,port))
+	logger.info("Making a coffee ...")
+	if(moreThanOneProduct): telegram = commands.DoCoffeeLeftTelegram(seqNumber)
+	else: telegram = commands.DoCoffeeRightTelegram(seqNumber)
+	commands.DoCommand(port,seqNumber,telegram)
+	CloseThePort(port)
+
+
+def MakeEspresso(moreThanOneProduct):
+	logger.disabled = True
+	port = OpenThePort()
+	seqNumber = 0
+	# Check for ACK, Get Status, Check if all statuses are okay
+	logger.info("Start script")
+	logger.info("Checking coffee machine status...")
+	commands.WaitTillReady(port,seqNumber)
+	# telegram = DoRinseRight(seqNumber)
+	# DoCommand(port,seqNumber,telegram)#
+	#print(commands.GetProductDumpLeft(seqNumber,port))
+	logger.info("Making an espresso ...")
+	if(moreThanOneProduct):telegram = commands.DoEspressoRightTelegram(seqNumber)
+	else: telegram = commands.DoEspressoLeftTelegram(seqNumber)
+	commands.DoCommand(port,seqNumber,telegram)
 	CloseThePort(port)
 
 def OpenThePort():

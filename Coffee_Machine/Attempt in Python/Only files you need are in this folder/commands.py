@@ -1,5 +1,5 @@
 import time
-from telegramFormat import *
+#from telegramFormat import *
 from api_definitions import *
 import itertools
 import struct
@@ -56,7 +56,7 @@ def CreateTelegram(PIP_p, PIE_p, PN_p, SA_p, DA_p, MI_p, MP_p, DL_p, dataPackets
     finalTelegram = [DPT_SpecialChar_t.SOH_e.value] + \
         shifted + [DPT_SpecialChar_t.EOT_e.value]
     
-    logger.info("\nSent from Pi: " + str(bytes(finalTelegram)))
+    logger.info("\nSent from Pi: " + str(finalTelegram))
     return bytes(finalTelegram)
 
 def CreateACKPacket(PIP_p, PIE_p, PN_p, SA_p, DA_p):
@@ -124,6 +124,80 @@ def HighNibble(bitArray):
 ############################################# START OF SENDING PACKETS  #######################################
 
 
+def WaitTillReady(port, seqNumber):
+    ready = False
+    readyCnt = 1
+    while(ready == False):
+        print("\n\n\n\n")
+        logger.info("ATTEMPT" + str(readyCnt) + "\n\n\n")
+        ready = CheckIfReady(port,seqNumber)
+        seqNumber +=1 
+        readyCnt +=1
+def CheckIfReady(port,seqNumber):
+    statuses = GetMachineStatus(port, seqNumber)[0]
+    logger.info("\nReading machine status...")
+    logger.debug(str(statuses))
+    # print (statuses[1]['Just Reset']) # How to Access Machine status bits
+    # print (statuses[0]['Coffee Left Process']) # How to Access General status bits 
+    del statuses['Machine Status']
+    statusCodes = list(val for key,val in statuses.items() if 'status' in key.lower())
+    if all([ v == 0 for v in statusCodes ]) :
+        logger.info("\Success")
+        logger.info ("\n The coffee machine is ready")
+        return True
+    else:
+        logger.error("\nSomething is wrong, one or more statuses indicate they are not ready")
+        input("\n Please check the coffee machine for errors and press any key to try again..")
+        return False
+
+def GetMachineStatus(port, seqNumber):
+    # Get the request telegram
+    logger.info("\n\n Sending a request to get the machine status...")
+    telegram = GetStatusTelegram(seqNumber)
+
+    # Get an ACK packet so the coffee machine is ready to send a response
+    InitRequest(port,seqNumber,telegram)
+    logger.info("\nResending the request to receive response...")
+    # Change the sequence number for the new packet
+    seqNumber += 1
+    telegram = GetStatusTelegram(seqNumber)
+    # Get the response data 
+    responseData = DoRequest(port,seqNumber,telegram)  
+    return GetStatusArrays(responseData)
+
+def InitRequest(port,seqNumber,telegram):
+    WaitTillACK(port, seqNumber, telegram)
+    ClearPortContents(port)
+
+def WaitTillACK(port, seqNumber, telegram):
+    ACKReceived = False
+    retryCnt = 0
+    while(ACKReceived == False and retryCnt <= MAX_ACK_RETRIES):
+        ACKReceived = CheckForAck(port, seqNumber, telegram)
+        if(ACKReceived):
+            break
+        time.sleep(0.8) # might be problem
+        seqNumber+=1
+        retryCnt +=1 
+def CheckForAck(port, seqNumber, telegram):
+    # Send Command/Request
+    port.write(bytes(telegram))  # send command to coffee machine
+    time.sleep(0.1)
+    # Read response
+    cmResponse = port.read_all()  # read from Pi
+
+    ##Convert response to telegram array
+    telegram = ResponseToTelegramArray(cmResponse)
+    logger.info("\n Received from coffee machine: " + str(telegram))
+    if(len(telegram) > 0 ):
+        if(telegram[2] == PacketTypes.ACK.value):
+            logger.info("\nCoffee machine sends ACK to command/request.. message received")
+            return True
+    else:
+        logger.info("\n Received no ACK packet from coffee machine...sending packet again")
+        return False
+
+# Check if machine is ready before sending any commands/requests
 def DoCommand(port,seqNumber,telegram):
     WaitTillACK(port,seqNumber,telegram)
     ClearPortContents(port)
@@ -144,61 +218,22 @@ def DoRequest(port,seqNumber, telegram):
             if (responseData[2] == PacketTypes.RESPONSE.value):
                 machineStatusReceived = True
                 logger.info("\nResponse successfully received:")
-                logger.info("\n Response received from coffee machine: " + str(response))
+                logger.info("\n Response received from coffee machine: " + str(responseData))
         else:
             return 0
             # Do something
     return responseData
 
-def InitRequest(port,seqNumber,telegram):
-    WaitTillACK(port, seqNumber, telegram)
-    ClearPortContents(port)
+
 
 def ClearPortContents(port):
     port.reset_input_buffer()
     port.reset_output_buffer()
 
-def GetMachineStatus(port, seqNumber):
-    # Get the request telegram
-    logger.info("\n\n Sending a request to get the machine status...")
-    telegram = GetStatus(seqNumber)
-
-    # Get an ACK packet so the coffee machine is ready to send a response
-    InitRequest(port,seqNumber,telegram)
-    logger.info("\nResending the request to receive response...")
-    # Change the sequence number for the new packet
-    seqNumber += 1
-    telegram = GetStatus(seqNumber)
-    # Get the response data 
-    responseData = DoRequest(port,seqNumber,telegram)  
-    return GetStatusArrays(responseData)
 
 
-def CheckIfReady(port,seqNumber):
-    statuses = GetMachineStatus(port, seqNumber)[0]
-    logger.info("\nReading machine status...")
-    # print (statuses[1]['Just Reset']) # How to Access Machine status bits
-    # print (statuses[0]['Coffee Left Process']) # How to Access General status bits 
-    del statuses['Machine Status']
-    statusCodes = list(val for key,val in statuses.items() if 'status' in key.lower())
-    if all([ v == 0 for v in statusCodes ]) :
-        logger.info("\Success")
-        logger.info ("\n The coffee machine is ready")
-        return True
-    else:
-        logger.error("\nSomething is wrong")
-        input("\n Please check the coffee machine for errors and press any key to try again..")
-        return False
+
     
-def WaitTillReady(port, seqNumber):
-    ready = False
-    readyCnt = 1
-    while(ready == False):
-        print("\n\n\n\n")
-        logger.info("ATTEMPT" + str(readyCnt) + "\n\n\n")
-        ready = CheckIfReady(port,seqNumber)
-        seqNumber +=1 
-        readyCnt +=1
 
 
 def GetStatusArrays(telegram):
@@ -239,35 +274,9 @@ def GetStatusArrays(telegram):
 
 
 
-def WaitTillACK(port, seqNumber, telegram):
-    ACKReceived = False
-    retryCnt = 0
-    while(ACKReceived == False and retryCnt <= MAX_ACK_RETRIES):
-        ACKReceived = CheckForAck(port, seqNumber, telegram)
-        if(ACKReceived):
-            break
-        time.sleep(0.8) # might be problem
-        seqNumber+=1
-        retryCnt +=1 
 
 
-def CheckForAck(port, seqNumber, telegram):
-    # Send Command/Request
-    port.write(bytes(telegram))  # send command to coffee machine
-    time.sleep(0.1)
-    # Read response
-    cmResponse = port.read_all()  # read from Pi
 
-    ##Convert response to telegram array
-    telegram = ResponseToTelegramArray(cmResponse)
-    logger.info("\n Received from coffee machine: " + str(cmResponse))
-    if(len(telegram) > 0 ):
-        if(telegram[2] == PacketTypes.ACK.value):
-            logger.info("\nCoffee machine sends ACK to command/request.. message received")
-            return True
-    else:
-        logger.info("\n Received no ACK packet from coffee machine...sending packet again")
-        return False
 
 def ResponseToTelegramArray(response):
     telegram = TelegramToIntArray(response)
@@ -394,7 +403,7 @@ def DoHotWaterRightTelegram(seqNum):
 
 ############################################# END OF PRODUCTS  ################################################
 
-####################################### START OF COMMANDS #####################################################
+####################################### START OF TELEGRAMS ####################################################
 
 def DoRinseTelegram(MI, MP, DL, seqNum):
     telegram = CreateTelegram(0x00, PacketTypes.COMMAND.value, seqNum, 0x42,
@@ -486,17 +495,14 @@ def DoRightScreenRinseTelegram(seqNum):
 def DoLeftScreenRinseTelegram(seqNum):
     telegram = DoScreenRinseTelegram(LEFT_SIDE, seqNum)
     return telegram
-
-
-####################################### END OF COMMANDS #######################################################
-
-####################################### START OF REQUESTS #####################################################
-
-def GetStatus(seqNum):
+def GetStatusTelegram(seqNum):
     telegram = CreateTelegram(0x00, PacketTypes.REQUEST.value, seqNum, 0x42, 0x41,
                               API_Command_t.GetStatus_e.value, 0, 0, False, [0])
     return telegram
 
+####################################### END OF TELEGRAMS ######################################################
+
+####################################### START OF REQUESTS #####################################################
 def GetRequest(seqNum,port):
     telegram = CreateTelegram(0x00, PacketTypes.REQUEST.value, seqNum, 0x42, 0x41,
                               API_Command_t.GetRequests_e.value, 0, 0, False, [0])
@@ -544,20 +550,32 @@ def DisplayAction(action, seqNum):
     return telegram
 
 
-def GetProductDump(side, seqNum):
+def GetProductDump(side, seqNum,port):
     telegram = CreateTelegram(0x00, PacketTypes.REQUEST.value, seqNum, 0x42, 0x41,
                               API_Command_t.GetProductDump_e.value, side, 0, False, [0])
-    return telegram
+
+    # Get the request telegram
+    logger.info("\n\n Sending a request to get the info messages...")
+
+    # Get an ACK packet so the coffee machine is ready to send a response
+    InitRequest(port,seqNum,telegram)
+    logger.info("\nResending the request to receive response...")
+    # Change the sequence number for the new packet
+    seqNum += 1
+    telegram = CreateTelegram(0x00, PacketTypes.REQUEST.value, seqNum, 0x42, 0x41,
+                              API_Command_t.GetProductDump_e.value, side, 0, False, [0])
+    # Get the response data 
+    responseData = DoRequest(port,seqNum,telegram)  
+    return responseData
+
+def GetProductDumpRight(seqNum,port):
+    response = GetProductDump(RIGHT_SIDE, seqNum,port)
+    return response
 
 
-def GetProductDumpRight(seqNum):
-    telegram = GetProductDump(RIGHT_SIDE, seqNum)
-    return telegram
-
-
-def GetProductDumpLeft(seqNum):
-    telegram = GetProductDump(LEFT_SIDE, seqNum)
-    return telegram
+def GetProductDumpLeft(seqNum,port):
+    response = GetProductDump(LEFT_SIDE, seqNum,port)
+    return response
 
 
 def GetSensorValues(seqNum,port):

@@ -40,7 +40,7 @@ def CheckForCRC(telegram):
     return API_CalculateCRC(dataToCheck,length)
 
 def SendACKPacket(port):
-    ACK = CreateACK(0x00,0x6A,0x02,0x41,0x42)
+    ACK = CreateACKPacket(0x00,0x6A,0x02,0x41,0x42)
     port.write(ACK)
 
 def ProcessRequest(telegram, port):
