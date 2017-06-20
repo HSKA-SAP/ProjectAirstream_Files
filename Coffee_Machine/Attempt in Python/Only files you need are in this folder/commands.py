@@ -133,6 +133,7 @@ def WaitTillReady(port, seqNumber):
         ready = CheckIfReady(port,seqNumber)
         seqNumber +=1 
         readyCnt +=1
+    return seqNumber
 def CheckIfReady(port,seqNumber):
     statuses = GetMachineStatus(port, seqNumber)[0]
     logger.info("\nReading machine status...")
@@ -141,13 +142,13 @@ def CheckIfReady(port,seqNumber):
     # print (statuses[0]['Coffee Left Process']) # How to Access General status bits 
     del statuses['Machine Status']
     statusCodes = list(val for key,val in statuses.items() if 'status' in key.lower())
-    if all([ v == 0 for v in statusCodes ]) :
+    print(statusCodes)
+    if all([ v == 1 for v in statusCodes ]) :
         logger.info("\Success")
         logger.info ("\n The coffee machine is ready")
         return True
     else:
         logger.error("\nSomething is wrong, one or more statuses indicate they are not ready")
-        input("\n Please check the coffee machine for errors and press any key to try again..")
         return False
 
 def GetMachineStatus(port, seqNumber):
@@ -339,7 +340,7 @@ def DoCoffee(side,seqNum):
     dataDict = {"Product Type: ":ProductType_t.Coffee_e.value, "Product Process: ":0, \
             "Water Quantity: ":135 , "Bean Hopper: ":1, "Cake Thickness: ":140, \
             "Tamping: ":64, "Pre-Infusion: ": 0, "Relax Time: ": 0, "Second Tamping: ":0, \
-            "Milk Qty: ":10, "Milk Temperature: ":255,"Milk Percent: ":1,"Milk Seq: ":MilkSequence_t.MilkSeqUndef_e.value,\
+            "Milk Qty: ":0, "Milk Temperature: ":255,"Milk Percent: ":0,"Milk Seq: ":MilkSequence_t.MilkSeqUndef_e.value,\
             "Latte Macchiato Time: ":1, "Foam Sequence: ":0, "Steam Time: ":1,\
             "Steam Temperature: ":30, "Everfoam Mode: ":0, "Air Stop Temperature: ":0, "Air Stop Time: ":10, \
             "Pump Speed Milk: ":1500, "Pump Speed Foam: ":3000, "param 23: ":0, "Milk/Coffee Delay: ":5}
@@ -363,7 +364,7 @@ def DoEspresso(side,seqNum):
     dataDict = {"Product Type: ":ProductType_t.Espresso_e.value, "Product Process: ":0, \
             "Water Quantity: ":50 , "Bean Hopper: ":0, "Cake Thickness: ":140, \
             "Tamping: ":64, "Pre-Infusion: ": 8, "Relax Time: ": 20, "Second Tamping: ":20, \
-            "Milk Qty: ":10, "Milk Temperature: ":255,"Milk Percent: ":1,"Milk Seq: ":MilkSequence_t.MilkSeqUndef_e.value,\
+            "Milk Qty: ":0, "Milk Temperature: ":255,"Milk Percent: ":0,"Milk Seq: ":MilkSequence_t.MilkSeqUndef_e.value,\
             "Latte Macchiato Time: ":1, "Foam Sequence: ":0, "Steam Time: ":1,\
             "Steam Temperature: ":30, "Everfoam Mode: ":0, "Air Stop Temperature: ":0, "Air Stop Time: ":10, \
             "Pump Speed Milk: ":1500, "Pump Speed Foam: ":3000, "param 23: ":0, "Milk/Coffee Delay: ":5}

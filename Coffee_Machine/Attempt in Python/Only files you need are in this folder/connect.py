@@ -13,45 +13,46 @@ formatter = logging.Formatter('%(asctime)s - %(module)s - %(levelname)s - %(mess
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+seqNumber = 0 
 
 ## Important ##
 # - Make sure format of RPi is little endian 
 # - When run on Pi -  use serial.Serial('/dev/ttyS0',115200, timeout=None)
 
-def MakeCoffee(moreThanOneProduct):
-	logger.disabled = True
-	port = OpenThePort()
+
+def Setup():
+	logger.disabled = False
+	global seqNumber
 	seqNumber = 0
+
+
+
+def MakeCoffee(port,moreThanOneProduct):
 	# Check for ACK, Get Status, Check if all statuses are okay
+	global seqNumber
 	logger.info("Start script")
 	logger.info("Checking coffee machine status...")
-	commands.WaitTillReady(port,seqNumber)
-	# telegram = DoRinseRight(seqNumber)
-	# DoCommand(port,seqNumber,telegram)#
-	#print(commands.GetProductDumpLeft(seqNumber,port))
+	#newSeqNumber = commands.WaitTillReady(port,seqNumber)
+	#seqNumber = newSeqNumber
 	logger.info("Making a coffee ...")
 	if(moreThanOneProduct): telegram = commands.DoCoffeeLeftTelegram(seqNumber)
 	else: telegram = commands.DoCoffeeRightTelegram(seqNumber)
 	commands.DoCommand(port,seqNumber,telegram)
-	CloseThePort(port)
+	seqNumber += 1
 
 
-def MakeEspresso(moreThanOneProduct):
-	logger.disabled = True
-	port = OpenThePort()
-	seqNumber = 0
+def MakeEspresso(port, moreThanOneProduct):
 	# Check for ACK, Get Status, Check if all statuses are okay
+	global seqNumber
 	logger.info("Start script")
 	logger.info("Checking coffee machine status...")
-	commands.WaitTillReady(port,seqNumber)
-	# telegram = DoRinseRight(seqNumber)
-	# DoCommand(port,seqNumber,telegram)#
-	#print(commands.GetProductDumpLeft(seqNumber,port))
+	#newSeqNumber = commands.WaitTillReady(port,seqNumber)
+	#seqNumber = newSeqNumber
 	logger.info("Making an espresso ...")
 	if(moreThanOneProduct):telegram = commands.DoEspressoRightTelegram(seqNumber)
 	else: telegram = commands.DoEspressoLeftTelegram(seqNumber)
 	commands.DoCommand(port,seqNumber,telegram)
-	CloseThePort(port)
+	seqNumber += 1
 
 def OpenThePort():
 	while True:
@@ -68,11 +69,11 @@ def OpenThePort():
 	return port
 def CloseThePort(port):
 	port.close()
-	input("script executed successfully, press any key to exit...")
+	print("script executed successfully, press any key to exit...")
 
 def InstantiatePort():
-	port = serial.Serial('COM6',115200,timeout=None)
+	port = serial.Serial('COM7',115200,timeout=None)
 	return port
 ############# Execute as script ###############
 if __name__ == "__main__":
-	MakeCoffee()
+	MakeCoffee(False)
