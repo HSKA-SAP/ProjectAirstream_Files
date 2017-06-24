@@ -22,10 +22,16 @@ namespace Airstream
         private static PictureBox _sapLogo;
         private static Bitmap _pathToSapLogo = new Bitmap(@"Pictures\SAP-Logo.jpg");
 
-        private static Label _labelWhite;
+        public static Panel _labelWhite;
         private static Color _labelWhiteBackColor = Color.FromArgb(255, 255, 255);
         private static Color _labelWhiteForeColor = Color.FromArgb(45, 45, 45);
         private static Font _labelWhiteFont = new Font("Arial Bold", 16.0f);
+        private static string projectFolder = "..\\..\\..\\";
+
+        public static string GetProjectFolder()
+        {
+            return projectFolder;
+        }
 
         public static Size GetSizeScreen()
         {
@@ -37,7 +43,7 @@ namespace Airstream
             return _screenDefaultFont;
         }
 
-        public static Label GetLabelGray()
+        public static Panel GetLabelGray()
         {
             return _labelWhite;
         }
@@ -128,13 +134,14 @@ namespace Airstream
 
             form.Controls.Add(_sapLogo);
 
-            _labelWhite = new Label();
+            _labelWhite = new Panel();
             _labelWhite.BackColor = _labelWhiteBackColor;
             _labelWhite.BorderStyle = BorderStyle.Fixed3D;
             _labelWhite.Location = new Point(Convert.ToInt32(_sizeScreen.Width * 0.06), Convert.ToInt32(_sizeScreen.Height * 0.25));
-            _labelWhite.Size = new Size(Convert.ToInt32(_sizeScreen.Width * 0.867), Convert.ToInt32(_sizeScreen.Height * 0.64));
+            _labelWhite.Size = new Size(Convert.ToInt32(_sizeScreen.Width * 0.867), Convert.ToInt32(_sizeScreen.Height * 0.5));
 
             form.Controls.Add(_labelWhite);
+
 
         }
     }

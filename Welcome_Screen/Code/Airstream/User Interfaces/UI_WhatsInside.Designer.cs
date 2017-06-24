@@ -1,6 +1,6 @@
 ﻿namespace Airstream.User_Interfaces
 {
-    partial class UI_Default
+    partial class UI_WhatsInside
     {
         /// <summary>
         /// Required designer variable.
@@ -30,10 +30,9 @@
         {
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Text = "UI_Default";
+            this.Text = "UI_WhatsInside";
         }
 
         #endregion
-
     }
 }
