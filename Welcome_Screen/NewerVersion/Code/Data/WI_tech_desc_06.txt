@@ -1,0 +1,6 @@
+Technische Daten:
+
+o Gewicht: 743 Gramm
+o Max. Höhe: 5000m
+o 3 Achsen Gimbal
+o Positionsbestimmung: GPS

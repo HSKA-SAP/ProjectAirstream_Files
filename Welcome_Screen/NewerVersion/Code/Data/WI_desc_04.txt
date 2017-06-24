@@ -1,0 +1,8 @@
+Beschreibung:
+
+o	Smarte Alltags Assistentin
+o	Beantwortet / Reagiert auf Fragen wie: 
+    - Alexa, starte Kaffeemaschine und mache mir einen Kaffee und einen Espresso
+    - Alexa, wie wird das Wetter heute Abend?
+    - Alexa, rechne 67 Grad Fahrenheit in Celsius um
+    - .. und vieles mehr

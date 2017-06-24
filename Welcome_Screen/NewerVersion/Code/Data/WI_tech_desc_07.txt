@@ -1,0 +1,6 @@
+Technische Daten:
+
+o Betriebssystem: Windows 10
+o CPU: Quad Core Intel Atom x5-Z8100, 1.04 GHz, Intel Airmont (14nm)
+o RAM: 2GB
+o Speicher: 64GB

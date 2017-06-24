@@ -1,0 +1,4 @@
+Beschreibung:
+
+o Mixed Reality Brille, die es dem Benutzer elaubt interaktive 3D Projektionen in der direkten Umgebung darzustellen
+o Bedienung über Gesten, Sprache, Kopfbewegung und Knöpfe

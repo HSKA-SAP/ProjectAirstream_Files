@@ -1,0 +1,5 @@
+Beschreibung:
+
+o Stellt relevante Geschäftsinformationen Live zur Verfügung
+o Kompetente Entscheidungen in Echtzeit treffen
+o Ad-hoc Analysen durchführen

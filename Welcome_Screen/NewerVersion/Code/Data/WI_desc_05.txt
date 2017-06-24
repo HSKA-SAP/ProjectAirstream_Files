@@ -1,0 +1,4 @@
+Beschreibung:
+
+o Smarte Wetterstation
+o Misst Daten wie Luftfeuchtigkeit, Temparatur und Ger‰uschpegel sowohl innerhalb des Airstreams als auch auﬂerhalb ñ alles in Echtzeit.

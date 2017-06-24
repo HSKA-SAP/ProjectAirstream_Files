@@ -1,0 +1,6 @@
+Beschreibung:
+
+o kleine aber sehr Leistungsfähige Drohne (27 min Flugzeit, bis zu 65km/h, bis zu 7 km Reichweite
+o 1080p Videostreaming
+o 4K Videoaufnahme
+o Nimmt Hindernisse auf bis zu 15m Entfernung selbst wahr
