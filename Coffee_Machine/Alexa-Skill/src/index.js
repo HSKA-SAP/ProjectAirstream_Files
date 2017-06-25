@@ -36,20 +36,17 @@ var handlers = {
 		 }
 		 
 		 switch (drink){
-				case "heißes wasser":
-					drink = "heißes Wasser"
-					break;
-				case "heiße wasser":
-					drink = "heißes Wasser"
-					break;
 				case "kaffee":
 					drink = "Kaffee"
 					break;
 				case "espresso":
 					drink = "Espresso"
 					break;
+				case "espressi":
+					drink = "Espresso"
+					break;
 				default:
-					this.emit(':tell', 'Tut mir leid, die Kaffeemaschine kann nur Kaffee, Espresso oder heißes Wasser zubereiten');
+					this.emit(':tell', 'Tut mir leid, die Kaffeemaschine kann nur Kaffee oder Espresso zubereiten');
 		 }
 		 
         this.emit('ConfirmationIntent', quantity, drink);
@@ -59,12 +56,12 @@ var handlers = {
   'MixedOrderIntent': function() {
 	  
 	  var quantityCoffee = 1;
-	  var quantityWater = 1;
+	  var quantityEspresso = 1;
 	  
-	  httpGet(quantityCoffee, quantityWater, (statusCode) => {
+	  httpGet(quantityCoffee, quantityEspresso, (statusCode) => {
                 
 				if (statusCode == 200){
-					this.emit(':tell', 'Gerne, ich werde Ihnen einen Kaffee und eine Tasse heißes Wasser machen' );
+					this.emit(':tell', 'Gerne, ich werde Ihnen einen Kaffee und eine Tasse Espresso machen' );
 				}
 				else
 					this.emit(':tell', 'Tut mir Leid, die Bestellung hat nicht funktioniert');
@@ -82,17 +79,17 @@ var handlers = {
   },
   
   'ConfirmationIntent': function(quantity, drink) {
-		var quantityWater = 0;
+		var quantityEspresso = 0;
 		var quantityCoffee = 0;
 		
-		if (drink == "heißes Wasser") {
-			quantityWater = quantity;
+		if (drink == "Espresso") {
+			quantityEspresso = quantity;
 		}
 		else
 			quantityCoffee = quantity;
 	  
 		
-		httpGet(quantityCoffee, quantityWater, (statusCode) => {
+		httpGet(quantityCoffee, quantityEspresso, (statusCode) => {
                 
 				if (statusCode == 200){
 					this.emit(':tell', 'Alles klar, ich werde Ihnen ' + (quantity == 2 ? "zwei Tassen" : "eine Tasse") + ' ' + drink + ' zubereiten' );
@@ -119,13 +116,13 @@ exports.handler = function(event, context, callback){
 var http = require('http');
 
 
-function httpGet(quantityCoffee, quantityWater, callback) {
+function httpGet(quantityCoffee, quantityEspresso, callback) {
 
     
     var options = {
         host: 'coffeeinairstream.hopto.org',
         port: 80,
-        path: '/cgi-bin/coffeeCGI.py?coffee=' + quantityCoffee + '&water=' + quantityWater,
+        path: '/cgi-bin/coffeeCGI.py?coffee=' + quantityCoffee + '&espresso=' + quantityEspresso,
         method: 'GET',
 
         
