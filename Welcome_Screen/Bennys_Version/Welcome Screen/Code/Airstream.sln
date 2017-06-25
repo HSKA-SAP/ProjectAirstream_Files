@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Airstream", "Airstream\Airstream.csproj", "{9A6845DC-8E78-460C-A024-329595D2A3B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Airstream.Tests", "Airstream.Tests\Airstream.Tests.csproj", "{ACE03E2E-9C82-4E6E-85ED-703B706A8B63}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9A6845DC-8E78-460C-A024-329595D2A3B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A6845DC-8E78-460C-A024-329595D2A3B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A6845DC-8E78-460C-A024-329595D2A3B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A6845DC-8E78-460C-A024-329595D2A3B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACE03E2E-9C82-4E6E-85ED-703B706A8B63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACE03E2E-9C82-4E6E-85ED-703B706A8B63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACE03E2E-9C82-4E6E-85ED-703B706A8B63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACE03E2E-9C82-4E6E-85ED-703B706A8B63}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
